@@ -24,12 +24,16 @@
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/"
+            "Database\\Seeders\\": "database/seeders/",
+            "Volantus\\Pigpio\\": "../php-pigpio/src",
+            "Volantus\\MCP3008\\": "../bbpi-spi/src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/"
+            "Tests\\": "tests/",
+            "Volantus\\Pigpio\\Tests\\": "../php-pigpio/tests",
+            "Volantus\\MCP3008\\Tests\\": "../bbpi-spi/tests"
         }
     },
     "scripts": {
