@@ -36,14 +36,23 @@ class ReadSensors extends Command
      */
     public function handle()
     {
-        $spiInterface = new RegularSpiDevice(new Client(), 1, 32000, 0);
+        $spiInterface = new RegularSpiDevice(new Client(), 1, 32000);
         $this->reader = new Reader($spiInterface, 3.3);
-        
-        // Reading value of ADC channel 4
-        $tempRoof = $this->reader->read(4);
-        // Getting the raw value, e.g. 789
-        $temp = $tempRoof->getRawValue();
 
-        return $temp;
+        while (true) {
+            // Reading value of ADC channel 4
+            $tempRoof = $this->reader->read(0);
+//            $potRoof = $this->reader->read(7);
+            // Getting the raw value, e.g. 789
+             $temp = $tempRoof->getRawValue();
+//            $pot = $potRoof->getRawValue();
+
+             $this->line($temp);
+//            $this->line($pot);
+
+            // Wait for 0,1 second...
+            usleep(1000000);
+        }
+
     }
 }
