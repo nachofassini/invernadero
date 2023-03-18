@@ -1,0 +1,95 @@
+type Stage {
+    id: ID!
+    cropId: Int! @rename(attribute: "crop_id")
+    crop: Crop! @belongsTo
+    name: String!
+    active: Boolean
+    day: Int
+    order: Int
+
+    "Stage duration"
+    days: Int!
+
+    "Minimum temperature"
+    minTemperature: Float! @rename(attribute: "min_temperature")
+
+    "Maximum temperature"
+    maxTemperature: Float! @rename(attribute: "max_temperature")
+
+    "Minimum humidity"
+    minHumidity: Float! @rename(attribute: "min_humidity")
+
+    "Maximum humidity"
+    maxHumidity: Float! @rename(attribute: "max_humidity")
+
+    "Minimum co2 concentration (pppm.)"
+    minCo2: Float! @rename(attribute: "min_co2")
+
+    "Maximum co2 concentration (pppm.)"
+    maxCo2: Float! @rename(attribute: "max_co2")
+
+    "Minimum light hours (Hs.)"
+    lightHours: Float! @rename(attribute: "light_hours")
+
+    "Irrigation per day (mm3)"
+    irrigation: Int!
+
+    createdAt: DateTime! @rename(attribute: "created_at")
+    updatedAt: DateTime! @rename(attribute: "updated_at")
+}
+
+input StageInput @validator {
+    cropId: ID! @rename(attribute: "crop_id")
+
+    id: ID
+
+    name: String!
+
+    "Stage duration"
+    days: Int!
+
+    "Minimum temperature"
+    minTemperature: Float! @rename(attribute: "min_temperature")
+
+    "Maximum temperature"
+    maxTemperature: Float! @rename(attribute: "max_temperature")
+
+    "Minimum humidity"
+    minHumidity: Float! @rename(attribute: "min_humidity")
+
+    "Maximum humidity"
+    maxHumidity: Float! @rename(attribute: "max_humidity")
+
+    "Minimum co2 concentration"
+    minCo2: Float! @rename(attribute: "min_co2")
+
+    "Maximum co2 concentration"
+    maxCo2: Float! @rename(attribute: "max_co2")
+
+    "Minimum light hours"
+    lightHours: Float! @rename(attribute: "light_hours")
+
+    "Irrigation per day (mm3)"
+    irrigation: Int!
+}
+
+extend type Query {
+    "Find a single stage by an identifying attribute."
+    stage("Search by primary key." id: ID! @eq): Stage! @find
+
+    "List multiple stages."
+    stages(
+        "Search by crop_id."
+        cropId: ID!
+            @eq(key: "crop_id")
+            @rules(apply: ["prohibits:name", "required_without:name"])
+
+        "Filters by name. Accepts SQL LIKE wildcards `%` and `_`."
+        name: String @where(operator: "like")
+    ): [Stage!]! @all
+}
+
+extend type Mutation {
+    upsertStage(data: StageInput! @spread): Stage! @upsert
+    deleteStage(id: ID!): Stage! @delete
+}

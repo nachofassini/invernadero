@@ -1,0 +1,31 @@
+"A datetime string with format `Y-m-d H:i:s`, e.g. `2018-05-23 13:43:32`."
+scalar DateTime
+    @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+scalar Date @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\Date")
+
+type ActivePlan {
+    crop: Crop
+    stage: Stage
+}
+
+"Indicates what fields are available at the top level of a query operation."
+type Query {
+    activePlan: ActivePlan!
+}
+
+input DateRange {
+    from: Date! @rules(apply: ["required_with:to"])
+    to: Date! @rules(apply: ["required_with:from"])
+}
+
+input DateTimeRange {
+    from: DateTime! @rules(apply: ["required_with:to"])
+    to: DateTime! @rules(apply: ["required_with:from"])
+}
+
+#import user.graphql
+#import crop.graphql
+#import stage.graphql
+#import measure.graphql
+#import device.graphql

@@ -1,0 +1,39 @@
+type Crop {
+    id: ID!
+    name: String!
+    active: Boolean!
+    stages: [Stage]!
+    stageCount: Int! @count(relation: "stages")
+    createdAt: DateTime! @rename(attribute: "created_at")
+    updatedAt: DateTime! @rename(attribute: "updated_at")
+}
+
+extend type Query {
+    activeCrop: Crop @first(scopes: ["active"])
+
+    crop(
+        "Search by primary key."
+        id: ID @eq @rules(apply: ["prohibits:name", "required_without:name"])
+
+        "Search by name."
+        name: String
+            @eq
+            @rules(apply: ["prohibits:id", "required_without:id", "name"])
+    ): Crop! @find
+
+    crops(
+        "Filters by name. Accepts SQL LIKE wildcards `%` and `_`."
+        name: String @where(operator: "like")
+    ): [Crop!]! @all
+}
+
+input CropInput @validator {
+    id: ID
+    name: String!
+    active: Boolean
+}
+
+type Mutation {
+    upsertCrop(data: CropInput! @spread): Crop! @upsert
+    deleteCrop(id: ID! @rules(apply: ["exists:crops"]) @eq): Crop! @delete
+}
