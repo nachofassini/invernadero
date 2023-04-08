@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      *
@@ -16,14 +15,14 @@ return new class extends Migration
         Schema::create('measures', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->double('consumption', 5, 2);
-            $table->double('outside_temperature', 5, 2);
-            $table->double('outside_humidity', 5, 2);
-            $table->double('inside_temperature', 5, 2);
-            $table->double('inside_humidity', 5, 2);
-            $table->double('soil_humidity', 5, 2);
-            $table->double('co2', 5, 2);
-            $table->double('lighting', 5, 2);
+            $table->double('consumption', 4, 1);
+            $table->double('inside_temperature', 4, 1);
+            $table->double('outside_temperature', 4, 1);
+            $table->double('inside_humidity', 4, 1);
+            $table->double('outside_humidity', 4, 1);
+            $table->double('soil_humidity', 4, 1);
+            $table->unsignedSmallInteger('co2');
+            $table->double('lighting', 4, 1);
         });
     }
 

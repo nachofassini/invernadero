@@ -22,5 +22,6 @@ class DatabaseSeeder extends Seeder
         // ]);
         $this->call(CropSeeder::class);
         $this->call(MeasureSeeder::class);
+        $this->call(ActivationSeeder::class);
     }
 }

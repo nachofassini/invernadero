@@ -18,7 +18,7 @@ final class StageInputValidator extends Validator
     {
         return [
             'cropId' => ['required', Rule::exists(Crop::class, 'id')],
-            'id' => [],
+            'id' => [fn () => $this->arg('id') ? Rule::exists(Crop::class, 'id') : ''],
             'name' => [
                 'required',
                 'string',
@@ -29,14 +29,26 @@ final class StageInputValidator extends Validator
                     ->ignore($this->arg('id'), 'id')
             ],
             'days' => ['required', 'integer', "min:1", "max:365"],
-            'minTemperature' => ['required', 'integer', "min:0", "max:50", /* "lt:data.maxTemperature" */],
-            'maxTemperature' => ['required', 'integer', "min:0", "max:50", /* "gt:data.minTemperature" */],
-            'minHumidity' => ['required', 'integer', "min:0", "max:100", /* "lt:data.minHumidity" */],
-            'maxHumidity' => ['required', 'integer', "min:0", "max:100", /* "gt:data.maxHumidity" */],
-            'minCo2' => ['required', 'integer', "min:400", "max:1200", /* "lt:data.maxCo2" */],
-            'maxCo2' => ['required', 'integer', "min:400", "max:1200", /* "gt:data.minCo2" */],
+            'minTemperature' => ['required', 'decimal:0,2', "min:0", "max:50",  "lte:maxTemperature" ],
+            'maxTemperature' => ['required', 'decimal:0,2', "min:0", "max:50",  "gte:minTemperature" ],
+            'minHumidity' => ['required', 'decimal:0,2', "min:0", "max:100",  "lte:maxHumidity" ],
+            'maxHumidity' => ['required', 'decimal:0,2', "min:0", "max:100",  "gte:minHumidity" ],
+            'minCo2' => ['required', 'integer', "min:400", "max:1200",  "lte:maxCo2" ],
+            'maxCo2' => ['required', 'integer', "min:400", "max:1200",  "gte:minCo2" ],
             'irrigation' => ['required', 'integer', "min:0", "max:2000"],
-            'lightHours' => ['required', 'integer', "min:0", "max:24"],
+            'lightHours' => ['required', 'decimal:0,2', "min:0", "max:24"],
+        ];
+    }
+
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array
+     */
+    public function attributes(): array
+    {
+        return [
+            'data.name' => 'name',
         ];
     }
 
@@ -44,6 +56,7 @@ final class StageInputValidator extends Validator
     {
         return [
             'cropId.exists' => 'No se puedo asociar a un cultivo.',
+            'name.unique' => 'El cultivo ya posee una etapa con ese nombre.',
             'name.min' => 'Debe ser mayor a 3 caracteres.',
             'name.max' => 'Debe ser menor a 50 caracteres.',
             'days.min' => 'Debe ser mayor a 1 día',

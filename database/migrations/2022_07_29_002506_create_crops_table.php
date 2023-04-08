@@ -14,9 +14,9 @@ return new class () extends Migration {
     {
         Schema::create('crops', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
             $table->string('name');
-            $table->boolean('active')->default(false);
+            $table->timestamp('active_since')->nullable();
+            $table->timestamps();
         });
     }
 

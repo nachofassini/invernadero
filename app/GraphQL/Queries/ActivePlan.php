@@ -2,6 +2,8 @@
 
 namespace App\GraphQL\Queries;
 
+use App\Models\Crop;
+
 final class ActivePlan
 {
     /**
@@ -10,11 +12,10 @@ final class ActivePlan
      */
     public function __invoke($_, array $args)
     {
+        $activeCrop = Crop::whereNotNull('active_since')->first();
         return [
-            "activePlan" => [
-                "crop" => [],
-                "stage" => [],
-            ]
+            "crop" => $activeCrop,
+            "stage" => $activeCrop->activeStage,
         ];
     }
 }

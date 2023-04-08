@@ -1,26 +1,52 @@
+enum SensorType {
+    Humidity
+    Temperature
+    Lighting
+    SoilHumidity
+    Co2
+}
+
+enum Measures {
+    insideTemperature
+    outsideTemperature
+    insideHumidity
+    outsideHumidity
+    soilHumidity
+    co2
+    lighting
+}
+
+enum SensorMeasureUnits {
+    Humidity @enum(value: "%")
+    Temperature @enum(value: "ºC")
+    Lighting @enum(value: "%")
+    SoilHumidity @enum(value: "%")
+    Co2 @enum(value: "ppm")
+}
+
 interface Sensors {
     consumption: Float!
 
     "Greenhouse temperature"
-    inside_temperature: Float!
+    insideTemperature: Float!
 
     "External temperature"
-    outside_temperature: Float!
+    outsideTemperature: Float!
 
     "Greenhouse humidity"
-    inside_humidity: Float!
+    insideHumidity: Float!
 
     "External temperature"
-    outside_humidity: Float!
+    outsideHumidity: Float!
 
     "Greenhouse soil humidity"
-    soil_humidity: Float!
+    soilHumidity: Float!
 
-    "Greenhouse li"
-    inside_lighting: Float!
+    "Co2 ppm"
+    co2: Float!
 
-    "External temperature"
-    outside_lighting: Float!
+    "Outside lightning percentage"
+    lighting: Float!
 }
 
 type Measure implements Sensors {
@@ -31,31 +57,31 @@ type Measure implements Sensors {
     consumption: Float!
 
     "Greenhouse temperature"
-    inside_temperature: Float!
+    insideTemperature: Float! @rename(attribute: "inside_temperature")
 
     "External temperature"
-    outside_temperature: Float!
+    outsideTemperature: Float! @rename(attribute: "outside_temperature")
 
     "Greenhouse humidity"
-    inside_humidity: Float!
+    insideHumidity: Float! @rename(attribute: "inside_humidity")
 
     "External temperature"
-    outside_humidity: Float!
+    outsideHumidity: Float! @rename(attribute: "outside_humidity")
 
     "Greenhouse soil humidity"
-    soil_humidity: Float!
+    soilHumidity: Float! @rename(attribute: "soil_humidity")
 
-    "Greenhouse li"
-    inside_lighting: Float!
+    "Co2 ppm"
+    co2: Float!
 
-    "External temperature"
-    outside_lighting: Float!
+    "Greenhouse light percentage"
+    lighting: Float!
 
     "When the measure was taken"
-    created_at: DateTime!
+    createdAt: DateTime! @rename(attribute: "created_at")
 
     "When the measure was last updated."
-    updated_at: DateTime!
+    updatedAt: DateTime! @rename(attribute: "updated_at")
 }
 
 type MeasureStatistic implements Sensors {
@@ -63,49 +89,54 @@ type MeasureStatistic implements Sensors {
     consumption: Float!
 
     "Greenhouse temperature"
-    inside_temperature: Float!
+    insideTemperature: Float! @rename(attribute: "inside_temperature")
 
     "External temperature"
-    outside_temperature: Float!
+    outsideTemperature: Float! @rename(attribute: "outside_temperature")
 
     "Greenhouse humidity"
-    inside_humidity: Float!
+    insideHumidity: Float! @rename(attribute: "inside_humidity")
 
     "External temperature"
-    outside_humidity: Float!
+    outsideHumidity: Float! @rename(attribute: "outside_humidity")
 
     "Greenhouse soil humidity"
-    soil_humidity: Float!
+    soilHumidity: Float! @rename(attribute: "soil_humidity")
 
-    "Greenhouse li"
-    inside_lighting: Float!
+    "Co2 ppm"
+    co2: Float!
 
-    "External temperature"
-    outside_lighting: Float!
+    "Greenhouse light percentage"
+    lighting: Float!
 }
 
 extend type Query {
     "Find a single stage by an identifying attribute."
-    measure("Search by primary key." id: ID! @eq): Measure @find
+    measure("Search by primary key." id: ID! @eq): Measure! @find
 
     "Get last measure"
-    lastMeasure: Measure @first(scopes: ["last"])
+    lastMeasure: Measure! @first(scopes: ["last"])
+
+    # "Get 5 last measure"
+    lastMeasures: [Measure!]!
 
     "Get measures by date"
-    measures(created_at: DateTimeRange! @whereBetween): [Measure!]! @all
+    measures(
+        createdAt: DateTimeRange! @rename(attribute: "created_at") @whereBetween
+    ): [Measure!]! @all
 
     "Get measures average grouped by day"
     measuresAverageByDay(
-        created_at: DateRange! @whereBetween
+        createdAt: DateRange! @rename(attribute: "created_at") @whereBetween
     ): [MeasureStatistic!]!
 
     # "Get measures average grouped by hour"
     measuresAverageByHour(
-        created_at: DateTimeRange! @whereBetween
+        createdAt: DateTimeRange! @rename(attribute: "created_at") @whereBetween
     ): [MeasureStatistic!]!
 
     # "Get measures average of a period"
     measuresAverage(
-        created_at: DateTimeRange! @whereBetween
+        createdAt: DateTimeRange! @rename(attribute: "created_at") @whereBetween
     ): [MeasureStatistic!]!
 }

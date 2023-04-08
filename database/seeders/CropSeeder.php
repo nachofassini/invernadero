@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Crop;
 use App\Models\Stage;
+use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -16,14 +17,15 @@ class CropSeeder extends Seeder
      */
     public function run()
     {
-        $strawberryCrop = Crop::create(['name' => 'Frutilla', 'active' => true]);
-        Crop::create(['name' => 'Banana', 'active' => false]);
-        Crop::create(['name' => 'Lechuga', 'active' => false]);
-        Crop::create(['name' => 'Tomate', 'active' => false]);
+        $strawberryCrop = Crop::create(['name' => 'Frutilla', 'active_since' => Carbon::now()->subDays(45)]);
+        Crop::create(['name' => 'Banana']);
+        Crop::create(['name' => 'Lechuga']);
+        Crop::create(['name' => 'Tomate']);
 
         $strawberryCrop->stages()->createMany([
             [
                 'name' => 'Germinación',
+                'order' => 1,
                 'days' => 30,
                 'min_temperature' => 20,
                 'max_temperature' => 30,
@@ -36,6 +38,7 @@ class CropSeeder extends Seeder
             ],
             [
                 'name' => 'Crecimiento',
+                'order' => 2,
                 'days' => 45,
                 'min_temperature' => 22.5,
                 'max_temperature' => 32.5,
@@ -48,6 +51,7 @@ class CropSeeder extends Seeder
             ],
             [
                 'name' => 'Maduración',
+                'order' => 3,
                 'days' => 20,
                 'min_temperature' => 22.5,
                 'max_temperature' => 30,

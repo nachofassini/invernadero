@@ -1,11 +1,26 @@
-type Stage {
+interface WeatherSetup {
+    minTemperature: Float!
+    maxTemperature: Float!
+    minHumidity: Float!
+    maxHumidity: Float!
+    minCo2: Float!
+    maxCo2: Float!
+    lightHours: Float!
+    irrigation: Int!
+}
+
+type Stage implements WeatherSetup {
     id: ID!
     cropId: Int! @rename(attribute: "crop_id")
     crop: Crop! @belongsTo
     name: String!
-    active: Boolean
+
+    "Current stage status"
+    active: Boolean!
+    order: Int!
+
+    "If stage is active, represents days since it has been activated"
     day: Int
-    order: Int
 
     "Stage duration"
     days: Int!

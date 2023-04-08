@@ -25,14 +25,14 @@ class MeasureFactory extends Factory
     public function definition()
     {
         return [
-            'consumption' => fake()->randomFloat(2, 0, 12), // consumo
-            'outside_temperature' => fake()->randomFloat(2, -10, 45), // Temperatura externa
-            'outside_humidity' => fake()->randomFloat(2, 0, 100), // Humedad interna
-            'inside_temperature' => fake()->randomFloat(2, 0, 45), // Temperatura interna
-            'inside_humidity' => fake()->randomFloat(2, 0, 100), // Humedad interna
-            'soil_humidity' => fake()->randomFloat(2, 0, 100), // Humedad del suelo
-            'co2' => fake()->randomFloat(2, 0, 100), // Concentración CO2
-            'lighting' => fake()->randomFloat(2, 0, 100),  // Iluminación
+            'consumption' => fake()->randomFloat(1, 0, 12), // consumo
+            'inside_temperature' => fake()->randomFloat(1, 0, 45), // Temperatura interna
+            'outside_temperature' => fake()->randomFloat(1, -10, 45), // Temperatura externa
+            'inside_humidity' => fake()->randomFloat(1, 0, 100), // Humedad interna
+            'outside_humidity' => fake()->randomFloat(1, 0, 100), // Humedad interna
+            'soil_humidity' => fake()->randomFloat(1, 0, 100), // Humedad del suelo
+            'co2' => fake()->numberBetween(400, 1200), // Concentración CO2
+            'lighting' => fake()->randomFloat(1, 0, 100),  // Iluminación
         ];
     }
 }

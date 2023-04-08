@@ -11,7 +11,7 @@ type ActivePlan {
 
 "Indicates what fields are available at the top level of a query operation."
 type Query {
-    activePlan: ActivePlan!
+    activePlan: ActivePlan! @deprecated(reason: "Use `activeCrop` instead")
 }
 
 input DateRange {
@@ -28,4 +28,4 @@ input DateTimeRange {
 #import crop.graphql
 #import stage.graphql
 #import measure.graphql
-#import device.graphql
+#import activation.graphql

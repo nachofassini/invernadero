@@ -1,0 +1,86 @@
+enum Device {
+    FAN @enum(value: "fan")
+    EXTRACTOR @enum(value: "extractor")
+    LIGHT @enum(value: "light")
+    IRRIGATION @enum(value: "irrigation")
+}
+
+enum ActivationType {
+    low_temp
+    high_temp
+    low_humidity
+    high_humidity
+    low_soil_humidity
+    high_soil_humidity
+    low_lighting
+    low_co2
+    high_co2
+    manual
+}
+
+enum MeasureUnit {
+    mm3 @enum(value: "mm3")
+    m3 @enum(value: "m3")
+    percentage @enum(value: "%")
+    hours @enum(value: "Hs.")
+    mins @enum(value: "Mins.")
+    ppm
+    celsius @enum(value: "ºC")
+}
+
+enum DeviceMeasureUnits {
+    FAN @enum(value: "mins.")
+    EXTRACTOR @enum(value: "mins.")
+    LIGHT @enum(value: "Hs.")
+    IRRIGATION @enum(value: "mm3")
+}
+
+type Activation {
+    "Unique primary key."
+    id: ID!
+
+    "device name"
+    device: Device!
+
+    "Activation trigger motive"
+    activatedBy: ActivationType @rename(attribute: "activated_by")
+
+    "Current status"
+    enabled: Boolean!
+
+    "Measure id that triggered the activation"
+    measureId: ID @rename(attribute: "measure_id")
+
+    "Measure that triggered the activation"
+    measure: Measure
+
+    "value of the amount of water/ minutes of vent / hs of light delivered / etc..."
+    amount: Float!
+
+    "measure unit for the amount delivered (mm3 for water, mins for vent, hs for lighting, etc.."
+    measureUnit: MeasureUnit @rename(attribute: "measure_unit")
+
+    "Active end date"
+    activeUntil: Date @rename(attribute: "active_until")
+    createdAt: DateTime! @rename(attribute: "created_at")
+    updatedAt: DateTime! @rename(attribute: "updated_at")
+}
+
+extend type Query {
+    "Find a single stage by an identifying attribute."
+    activation("Search by primary key." id: ID! @eq): Activation! @find
+
+    "Get last activations, may be filtered by device type"
+    activations(device: Device): [Activation!]!
+
+    "Get currently enabled devices"
+    enabledDevices: [Activation!]!
+}
+
+extend type Mutation {
+    activateDevice(
+        device: Device! @rules(apply: ["App\\Rules\\DeviceIsNotActive"])
+        amount: Float!
+    ): Activation!
+    deactivateDevice(device: Device!): Int!
+}

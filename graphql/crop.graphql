@@ -2,8 +2,16 @@ type Crop {
     id: ID!
     name: String!
     active: Boolean!
+    "Days since have been activated"
+    day: Int!
+    "Total days to cultivate crop"
+    days: Int!
     stages: [Stage]!
     stageCount: Int! @count(relation: "stages")
+    activeStage: Stage
+    "Date in which crop cultivation has been enabled. Only one crop will have this prop set at a time"
+    activeSince: DateTime @rename(attribute: "active_since")
+    activeUntil: DateTime
     createdAt: DateTime! @rename(attribute: "created_at")
     updatedAt: DateTime! @rename(attribute: "updated_at")
 }
@@ -30,10 +38,22 @@ extend type Query {
 input CropInput @validator {
     id: ID
     name: String!
-    active: Boolean
 }
 
 type Mutation {
+    activateCrop(
+        id: ID!
+            @rules(
+                apply: ["exists:crops", "exists:stages,crop_id"]
+                messages: [
+                    {
+                        rule: "exists"
+                        message: "El cultivo no existe o no tiene etapas definidas"
+                    }
+                ]
+            )
+    ): Crop!
+    deactivateCrop: Int!
     upsertCrop(data: CropInput! @spread): Crop! @upsert
     deleteCrop(id: ID! @rules(apply: ["exists:crops"]) @eq): Crop! @delete
 }

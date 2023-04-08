@@ -17,12 +17,12 @@ class Measure extends Model
      */
     protected $casts = [
         'consumption' => 'double',
-        'outside_temperature' => 'double',
-        'outside_humidity' => 'double',
         'inside_temperature' => 'double',
+        'outside_temperature' => 'double',
         'inside_humidity' => 'double',
+        'outside_humidity' => 'double',
         'soil_humidity' => 'double',
-        'co2' => 'double',
+        'co2' => 'integer',
         'lighting' => 'double',
     ];
 
@@ -32,7 +32,16 @@ class Measure extends Model
      * @param  Builder  $query
      * @return Builder
      */
-    public function scopeLast(Builder $query) {
+    public function scopeLast(Builder $query)
+    {
         return $query->latest();
+    }
+
+    /**
+     * Get the activations triggered by this measure.
+     */
+    public function activations()
+    {
+        return $this->hasMany(Activation::class);
     }
 }

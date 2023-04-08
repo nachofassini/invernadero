@@ -17,6 +17,7 @@ return new class () extends Migration {
             $table->timestamps();
             $table->foreignId('crop_id')->constrained();
             $table->string('name');
+            $table->unsignedSmallInteger('order');
             $table->unsignedSmallInteger('days');
             $table->double('min_temperature', 5, 2);
             $table->double('max_temperature', 5, 2);

@@ -24,9 +24,8 @@ final class MeasuresAverage
                 DB::raw('AVG(inside_humidity) as inside_humidity'),
                 DB::raw('AVG(outside_humidity) as outside_humidity'),
                 DB::raw('AVG(soil_humidity) as soil_humidity'),
-                DB::raw('AVG(soil_humidity) as soil_humidity'),
-                DB::raw('AVG(inside_lighting) as inside_lighting'),
-                DB::raw('AVG(outside_lighting) as outside_lighting'),
+                DB::raw('AVG(co2) as co2'),
+                DB::raw('AVG(lighting) as lighting'),
             )
             ->groupBy('DATE(created_at)')
             ->having('id', '>', 0)
