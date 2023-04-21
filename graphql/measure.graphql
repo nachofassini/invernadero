@@ -85,6 +85,8 @@ type Measure implements Sensors {
 }
 
 type MeasureStatistic implements Sensors {
+    date: DateTime!
+
     "Electricity consumption."
     consumption: Float!
 
@@ -117,8 +119,11 @@ extend type Query {
     "Get last measure"
     lastMeasure: Measure! @first(scopes: ["last"])
 
-    # "Get 5 last measure"
-    lastMeasures: [Measure!]!
+    # "Get last {limit} measures"
+    lastMeasures(limit: Int = 5, offset: Int = 0): [Measure!]!
+
+    # "Get last measures paginated"
+    lastMeasuresPaginated: [Measure!]! @paginate(scopes: ["last"])
 
     "Get measures by date"
     measures(
@@ -126,17 +131,17 @@ extend type Query {
     ): [Measure!]! @all
 
     "Get measures average grouped by day"
-    measuresAverageByDay(
+    measuresAverageGroupedByDay(
         createdAt: DateRange! @rename(attribute: "created_at") @whereBetween
     ): [MeasureStatistic!]!
 
     # "Get measures average grouped by hour"
-    measuresAverageByHour(
+    measuresAverageGroupedByHour(
         createdAt: DateTimeRange! @rename(attribute: "created_at") @whereBetween
     ): [MeasureStatistic!]!
 
     # "Get measures average of a period"
     measuresAverage(
         createdAt: DateTimeRange! @rename(attribute: "created_at") @whereBetween
-    ): [MeasureStatistic!]!
+    ): MeasureStatistic!
 }

@@ -66,15 +66,37 @@ type Activation {
     updatedAt: DateTime! @rename(attribute: "updated_at")
 }
 
+type ActivationsGroupedByDevice {
+    device: Device!
+    count: Int!
+}
+
+type ActivationsGroupedByType {
+    activatedBy: ActivationType! @rename(attribute: "activated_by")
+    count: Int!
+}
+
 extend type Query {
     "Find a single stage by an identifying attribute."
     activation("Search by primary key." id: ID! @eq): Activation! @find
 
     "Get last activations, may be filtered by device type"
-    activations(device: Device): [Activation!]!
+    activations(device: Device, limit: Int = 5, offset: Int = 0): [Activation!]!
+
+    "Get last activations paginated, may be filtered by device type"
+    lastActivationsPaginated(device: Device): [Activation!]!
+        @paginate(scopes: ["last", "filterByDevice"])
 
     "Get currently enabled devices"
     enabledDevices: [Activation!]!
+
+    activationsCountGroupedByDevice(
+        amount: Int = 100
+    ): [ActivationsGroupedByDevice!]!
+
+    activationsCountGroupedByType(
+        amount: Int = 100
+    ): [ActivationsGroupedByType!]!
 }
 
 extend type Mutation {

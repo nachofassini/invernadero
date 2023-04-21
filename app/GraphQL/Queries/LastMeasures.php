@@ -12,6 +12,6 @@ final class LastMeasures
      */
     public function __invoke($_, array $args)
     {
-        return  DB::table('measures')->latest()->limit(5)->get();
+        return  DB::table('measures')->latest()->limit($args["limit"])->offset($args["offset"])->get();
     }
 }

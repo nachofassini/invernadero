@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -35,6 +36,32 @@ class Activation extends Model
     public function getEnabledAttribute()
     {
         return $this->active_until === null;
+    }
+
+    /**
+     * Scope to get latests
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
+    public function scopeLast(Builder $query)
+    {
+        return $query->latest();
+    }
+
+    /**
+     * Scope to filter bt device
+     *
+     * @param  Builder  $query
+     * @param  array{}  $args
+     * @return Builder
+     */
+    public function scopeFilterByDevice(Builder $query, array $args = [])
+    {
+        $deviceName = $args['device'] ?? null;
+        return $query->when($deviceName, function ($query, $deviceName) {
+            $query->where('device', $deviceName);
+        });
     }
 
     /**

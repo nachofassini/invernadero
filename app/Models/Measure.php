@@ -27,7 +27,7 @@ class Measure extends Model
     ];
 
     /**
-     * Scope a query to only include popular users.
+     * Scope to get latests
      *
      * @param  Builder  $query
      * @return Builder

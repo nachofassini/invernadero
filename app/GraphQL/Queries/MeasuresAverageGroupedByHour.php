@@ -5,7 +5,7 @@ namespace App\GraphQL\Queries;
 use App\Models\Measure;
 use Illuminate\Support\Facades\DB;
 
-final class MeasuresAverageByHour
+final class MeasuresAverageGroupedByHour
 {
     /**
      * @param  null  $_
@@ -18,6 +18,7 @@ final class MeasuresAverageByHour
 
         return Measure::whereBetween('created_at', [$from, $to])
             ->select(
+                DB::raw('created_at as date'),
                 DB::raw('AVG(consumption) as consumption'),
                 DB::raw('AVG(inside_temperature) as inside_temperature'),
                 DB::raw('AVG(outside_temperature) as outside_temperature'),

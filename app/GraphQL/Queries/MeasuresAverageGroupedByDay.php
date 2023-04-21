@@ -5,7 +5,7 @@ namespace App\GraphQL\Queries;
 use App\Models\Measure;
 use Illuminate\Support\Facades\DB;
 
-final class MeasuresAverageByDay
+final class MeasuresAverageGroupedByDay
 {
     /**
      * @param  null  $_
@@ -19,6 +19,7 @@ final class MeasuresAverageByDay
 
         return Measure::whereBetween('created_at', [$from, $to])
             ->select(
+                DB::raw('created_at as date'),
                 DB::raw('AVG(consumption) as consumption'),
                 DB::raw('AVG(inside_temperature) as inside_temperature'),
                 DB::raw('AVG(outside_temperature) as outside_temperature'),
@@ -28,7 +29,7 @@ final class MeasuresAverageByDay
                 DB::raw('AVG(co2) as co2'),
                 DB::raw('AVG(lighting) as lighting'),
             )
-            ->groupByRaw('DATE(created_at)')
+            ->groupByRaw('strftime("%Y-%m-%d", created_at)')
             ->having('id', '>', 0)
             ->get();
     }

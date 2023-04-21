@@ -15,6 +15,10 @@ final class Activations
         $deviceName = $args['device'] ?? null;
         return Activation::when($deviceName, function ($query, $deviceName) {
             $query->where('device', $deviceName);
-        })->latest()->limit(5)->get();
+        })
+            ->latest()
+            ->limit($args["limit"])
+            ->offset($args["offset"])
+            ->get();
     }
 }

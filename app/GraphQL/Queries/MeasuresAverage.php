@@ -18,6 +18,7 @@ final class MeasuresAverage
 
         return Measure::whereBetween('created_at', [$from, $to])
             ->select(
+                DB::raw('created_at as date'),
                 DB::raw('AVG(consumption) as consumption'),
                 DB::raw('AVG(inside_temperature) as inside_temperature'),
                 DB::raw('AVG(outside_temperature) as outside_temperature'),
@@ -27,8 +28,7 @@ final class MeasuresAverage
                 DB::raw('AVG(co2) as co2'),
                 DB::raw('AVG(lighting) as lighting'),
             )
-            ->groupBy('DATE(created_at)')
-            ->having('id', '>', 0)
-            ->get();
+            ->get()
+            ->first();
     }
 }
