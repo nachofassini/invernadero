@@ -12,7 +12,7 @@ final class ActivationsCountGroupedByDevice
      */
     public function __invoke($_, array $args)
     {
-        $lastActivations = Activation::latest()->select('id')->limit($args["amount"]);
+        $lastActivations = Activation::latest()->select('id')->limit($args["amount"])->get();
 
         return Activation::latest()
             ->selectRaw('count(device) as count, device')

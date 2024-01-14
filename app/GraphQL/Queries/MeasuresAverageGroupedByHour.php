@@ -28,8 +28,8 @@ final class MeasuresAverageGroupedByHour
                 DB::raw('AVG(co2) as co2'),
                 DB::raw('AVG(lighting) as lighting'),
             )
-            ->groupByRaw('strftime("%H", created_at)')
-            ->having('id', '>', 0)
+            ->groupByRaw('Hour(created_at)')
+            // ->groupByRaw('strftime("%H", created_at)') // SQLite
             ->get();
     }
 }
