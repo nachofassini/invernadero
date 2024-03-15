@@ -31,8 +31,8 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
-            "Volantus\\Pigpio\\": "../php-pigpio/src",
-            "Volantus\\MCP3008\\": "../bbpi-spi/src/"
+            "Volantus\\Pigpio\\": "libs/php-pigpio/src",
+            "Volantus\\MCP3008\\": "libs/bbpi-spi/src/"
         }
     },
     "autoload-dev": {

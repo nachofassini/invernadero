@@ -42,17 +42,21 @@ class ReadSensors extends Command
         while (true) {
             // Reading value of ADC channel 4
             $tempRoof = $this->reader->read(0);
-//            $potRoof = $this->reader->read(7);
+            //            $potRoof = $this->reader->read(7);
             // Getting the raw value, e.g. 789
-             $temp = $tempRoof->getRawValue();
-//            $pot = $potRoof->getRawValue();
+            $temp = $tempRoof->getRawValue();
+            //            $pot = $potRoof->getRawValue();
 
-             $this->line($temp);
-//            $this->line($pot);
+            $this->line($temp);
+            //            $this->line($pot);
 
             // Wait for 0,1 second...
             usleep(1000000);
-        }
 
+            // Execute python scripts and get return value
+            // $command = escapeshellcmd('/usr/bin/python3 /path/to/your/script.py');
+            // $output = shell_exec($command);
+            // echo $output;
+        }
     }
 }
