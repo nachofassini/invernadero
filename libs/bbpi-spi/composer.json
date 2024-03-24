@@ -1,0 +1,34 @@
+{
+    "name": "volantus/mcp3008",
+    "description": "PHP library for reading values from the A/D converter MCP3008",
+    "type": "library",
+    "license": "GNUv3",
+    "authors": [
+        {
+            "name": "Marius Meissner",
+            "email": "marius.meissner@volantus.org"
+        },
+        {
+            "name": "Ignacio Fassini",
+            "email": "nachofassini@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": "^8.0.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5.10",
+        "doctrine/instantiator": "~1.3.1"
+    },
+    "suggest": {
+        "ext-berry-spi": "Allows directly/natively using SPI, without socket communication",
+        "volantus/php-pigpio": "Support for using Pigpio daemon socket"
+    },
+    "autoload": {
+        "psr-4": {
+            "Volantus\\MCP3008\\": "src/",
+            "Volantus\\MCP3008\\Tests\\": "tests/"
+        }
+    }
+}
