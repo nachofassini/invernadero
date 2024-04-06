@@ -5,9 +5,7 @@ namespace App\Console\Commands;
 use Ballen\GPIO\GPIO;
 use Illuminate\Console\Command;
 
-use const App\Models\PINS;
-
-class Water extends Command
+class Light extends Command
 {
     /**
      * The name and signature of the console command.
