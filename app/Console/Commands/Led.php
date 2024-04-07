@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Activation;
 use Ballen\GPIO\GPIO;
 use Illuminate\Console\Command;
 
@@ -32,7 +33,7 @@ class Led extends Command
         $gpio = new GPIO();
 
         // Configure our 'LED' output...
-        $led = $gpio->pin(23, GPIO::OUT);
+        $led = $gpio->pin(Activation::DEVICE_PINS['LIGHT'], GPIO::OUT);
 
         // Create a basic loop that runs continuously...
         while (true) {

@@ -6,21 +6,21 @@ use App\Models\Activation;
 use Ballen\GPIO\GPIO;
 use Illuminate\Console\Command;
 
-class Water extends Command
+class Fan extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'Water:test';
+    protected $signature = 'Fan:test';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Test turning on water pump';
+    protected $description = 'Test turning on Fan';
 
     /**
      * Execute the console command.
@@ -32,8 +32,8 @@ class Water extends Command
         // Create a new instance of the GPIO class.
         $gpio = new GPIO();
 
-        // Configure our 'Water' output...
-        $led = $gpio->pin(Activation::DEVICE_PINS['WATER'], GPIO::OUT);
+        // Configure our 'Fan' output...
+        $led = $gpio->pin(Activation::DEVICE_PINS['FAN'], GPIO::OUT);
 
         // Create a basic loop that runs continuously...
         while (true) {

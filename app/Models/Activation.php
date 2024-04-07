@@ -6,15 +6,24 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-const PINS = [
-    'LIGHT' => 19,
-    'WATER' => 26,
-];
-
+/* enum DevicePins: int
+{
+    case FAN = 6;
+    case EXTRACTOR = 13;
+    case LIGHT = 19;
+    case WATER = 26;
+} */
 
 class Activation extends Model
 {
     use HasFactory;
+
+    const DEVICE_PINS = [
+        'FAN' => 6,
+        'EXTRACTOR' => 13,
+        'LIGHT' => 19,
+        'WATER' => 26,
+    ];
 
     /**
      * The attributes that should be cast.
