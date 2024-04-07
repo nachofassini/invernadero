@@ -43,15 +43,7 @@ class ReadSensors extends Command
     {
         $measure = new Measure();
 
-        // 'inside_temperature' => 'double', => DONE
-        // 'outside_temperature' => 'double', => DONE
-        // 'inside_humidity' => 'double', => DONE
-        // 'outside_humidity' => 'double', => DONE
-        // 'soil_humidity' => 'double',
-        // 'co2' => 'integer',
-        // 'lighting' => 'double',
-
-        // external temperature and humidity
+        // external lightning
         $output = new BufferedOutput();
         $this->runCommand('read:external:lightning', [], $output);
         preg_match('/([0-9.]+)%/', $output->fetch(), $matches);
@@ -77,6 +69,6 @@ class ReadSensors extends Command
         preg_match('/([0-9.]+)%/', $output->fetch(), $matches);
         $measure->soil_humidity = $matches[1];
 
-        logger($measure->toArray());
+        $measure->save();
     }
 }
