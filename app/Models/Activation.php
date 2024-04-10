@@ -2,27 +2,76 @@
 
 namespace App\Models;
 
+use DateTime;
+use DateTimeZone;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-/* enum DevicePins: int
-{
-    case FAN = 6;
-    case EXTRACTOR = 13;
-    case LIGHT = 19;
-    case WATER = 26;
-} */
 
 class Activation extends Model
 {
     use HasFactory;
+
+    const LOW_TEMPERATURE = 'low_temperature';
+    const HIGH_TEMPERATURE = 'high_temperature';
+    const LOW_HUMIDITY = 'low_humidity';
+    const HIGH_HUMIDITY = 'high_humidity';
+    const LOW_SOIL_HUMIDITY = 'low_soil_humidity';
+    const HIGH_SOIL_HUMIDITY = 'high_soil_humidity';
+    const LOW_CO2 = 'low_co2';
+    const HIGH_CO2 = 'high_co2';
+    const LOW_LIGHTING = 'low_lighting';
+    const MANUAL = 'manual';
+
+    const DEVICE_FAN = 'fan';
+    const DEVICE_EXTRACTOR = 'extractor';
+    const DEVICE_LIGHT = 'light';
+    const DEVICE_WATER = 'irrigation';
+
+    const DEVICES = [
+        self::DEVICE_FAN,
+        self::DEVICE_EXTRACTOR,
+        self::DEVICE_LIGHT,
+        self::DEVICE_WATER,
+    ];
 
     const DEVICE_PINS = [
         'FAN' => 6,
         'EXTRACTOR' => 13,
         'LIGHT' => 19,
         'WATER' => 26,
+    ];
+
+    const UNIT_MILLIMETERS = 'mm3';
+    const UNIT_CUBIC_METERS = 'm3';
+    const UNIT_PERCENTAGE = '%';
+    const UNIT_HOURS = 'Hs.';
+    const UNIT_MINUTES = 'Mins.';
+    const UNIT_PARTS_PER_MILLION = 'ppm';
+    const UNIT_CELSIUS = 'ºC';
+
+    const MEASURE_UNITS = [
+        self::UNIT_MILLIMETERS,
+        self::UNIT_CUBIC_METERS,
+        self::UNIT_PERCENTAGE,
+        self::UNIT_HOURS,
+        self::UNIT_MINUTES,
+        self::UNIT_PARTS_PER_MILLION,
+        self::UNIT_CELSIUS,
+    ];
+
+    const TYPES = [
+        self::LOW_TEMPERATURE,
+        self::HIGH_TEMPERATURE,
+        self::LOW_HUMIDITY,
+        self::HIGH_HUMIDITY,
+        self::LOW_SOIL_HUMIDITY,
+        self::HIGH_SOIL_HUMIDITY,
+        self::LOW_CO2,
+        self::HIGH_CO2,
+        self::LOW_LIGHTING,
+        self::MANUAL,
     ];
 
     /**
@@ -43,14 +92,29 @@ class Activation extends Model
      * @var array
      */
     protected $fillable = [
+        'activated_by',
+        'measure_id',
         'device',
         'amount',
-        'activated_by',
+        'measure_unit',
     ];
 
     public function getEnabledAttribute()
     {
         return $this->active_until === null;
+    }
+
+    public static function getSunriseTime()
+    {
+        $latitude = -24.7821; // Latitude for Salta, Argentina
+        $longitude = -65.4232; // Longitude for Salta, Argentina
+
+        $sun_info = date_sun_info(time(), $latitude, $longitude);
+
+        $sunriseTime = new DateTime('@' . $sun_info['sunrise']);
+        $sunriseTime->setTimezone(new DateTimeZone('America/Argentina/Salta'));
+
+        return $sunriseTime;
     }
 
     /**

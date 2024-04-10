@@ -12,6 +12,8 @@ use Illuminate\Database\Seeder;
 
 class MeasureSeeder extends Seeder
 {
+    use WithoutModelEvents;
+
     /**
      * Run the database seeds.
      *

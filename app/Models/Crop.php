@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Traits\CalculatesPlanDeviations;
+use App\Models\Traits\FixPlanDeviations;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -9,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Crop extends Model
 {
-    use HasFactory;
+    use CalculatesPlanDeviations, FixPlanDeviations, HasFactory;
 
     /**
      * The attributes that should be cast.
@@ -73,7 +75,6 @@ class Crop extends Model
 
         $rangeStart = 0;
         foreach ($this->stages as $stage) {
-            // TODO use stage init and end date instead of day number (to be more accurate)
             if ($daysActive >= $rangeStart && $daysActive < ($rangeStart + $stage->days)) {
                 return $stage;
             }
@@ -81,6 +82,19 @@ class Crop extends Model
         }
 
         return null;
+    }
+
+    /**
+     * @param  Measure $measure
+     * Get plan deviations for current measure and trigger adjustments.
+     */
+    public function handlePlanDeviations(Measure $measure)
+    {
+        $deviations = $this->getPlanDeviations($measure);
+
+        logger('Plan deviations', $deviations);
+
+        $this->fixDeviations($deviations, $measure);
     }
 
     /**

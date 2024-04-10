@@ -2,25 +2,33 @@
 
 namespace App\Console\Commands;
 
+use App\Console\Traits\HasActivationCause;
 use App\Models\Activation;
 use Ballen\GPIO\GPIO;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Date;
 
 class Led extends Command
 {
+    use HasActivationCause;
+
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'led:test';
+    protected $signature = 'led:switch 
+                                {cause : Activation cause}
+                                {measureId? : Measure that triggered the activation}
+                                {--turn=on : Turn Water on or off} 
+                                {--time=1 : Time the LED will be on or off in minutes}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Test turning on a Led';
+    protected $description = 'Switch Led light on or off';
 
     /**
      * Execute the console command.
@@ -29,22 +37,38 @@ class Led extends Command
      */
     public function handle()
     {
+        $turnOn = $this->option('turn') === 'on';
+        $time = $this->option('time');
+
         // Create a new instance of the GPIO class.
         $gpio = new GPIO();
 
         // Configure our 'LED' output...
         $led = $gpio->pin(Activation::DEVICE_PINS['LIGHT'], GPIO::OUT);
 
-        // Create a basic loop that runs continuously...
-        while (true) {
-            // Turn the LED on...
+        if ($turnOn) {
+            $activation = Activation::create([
+                'activated_by' => $this->getActivationCause(),
+                'measure_id' => $this->getActivationMeasureId(),
+                'device' => Activation::DEVICE_LIGHT,
+                'amount' => $time,
+                'measure_unit' => Activation::UNIT_MINUTES,
+            ]);
+
             $led->setValue(GPIO::HIGH);
-            // Wait for one second...
-            sleep(1);
-            // Turn off the LED...
+            $this->info('Led is on');
+            logger('Turning on led for ' . $time . ' minutes');
+            sleep($time * 60);
             $led->setValue(GPIO::LOW);
-            // Wait for one second...
-            sleep(1);
+            $this->info('Led is off');
+            logger('Turning off led');
+
+            $activation->active_until = Date::now();
+            $activation->save();
+        } else {
+            $led->setValue(GPIO::LOW);
+            $this->info('Led is off');
+            logger('Turning off led');
         }
     }
 }
