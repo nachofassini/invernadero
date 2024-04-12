@@ -25,7 +25,7 @@ enum SensorMeasureUnits {
 }
 
 interface Sensors {
-    consumption: Float!
+    consumption: Float
 
     "Greenhouse temperature"
     insideTemperature: Float!
@@ -43,7 +43,7 @@ interface Sensors {
     soilHumidity: Float!
 
     "Co2 ppm"
-    co2: Float!
+    co2: Float
 
     "Outside lightning percentage"
     lighting: Float!
@@ -54,7 +54,7 @@ type Measure implements Sensors {
     id: ID!
 
     "Electricity consumption."
-    consumption: Float!
+    consumption: Float
 
     "Greenhouse temperature"
     insideTemperature: Float! @rename(attribute: "inside_temperature")
@@ -72,7 +72,7 @@ type Measure implements Sensors {
     soilHumidity: Float! @rename(attribute: "soil_humidity")
 
     "Co2 ppm"
-    co2: Float!
+    co2: Float
 
     "Greenhouse light percentage"
     lighting: Float!
@@ -88,7 +88,7 @@ type MeasureStatistic implements Sensors {
     date: DateTime!
 
     "Electricity consumption."
-    consumption: Float!
+    consumption: Float
 
     "Greenhouse temperature"
     insideTemperature: Float! @rename(attribute: "inside_temperature")
@@ -106,7 +106,7 @@ type MeasureStatistic implements Sensors {
     soilHumidity: Float! @rename(attribute: "soil_humidity")
 
     "Co2 ppm"
-    co2: Float!
+    co2: Float
 
     "Greenhouse light percentage"
     lighting: Float!
