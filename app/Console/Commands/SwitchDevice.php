@@ -8,7 +8,7 @@ use Ballen\GPIO\GPIO;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Date;
 
-class Fan extends Command
+class SwitchDevice extends Command
 {
     use HasActivationCause;
 
@@ -17,25 +17,19 @@ class Fan extends Command
      *
      * @var string
      */
-    protected $signature = 'fan:switch
+    protected $signature = 'device:switch 
+                                {device : Device to switch}
                                 {cause : Activation cause}
                                 {measureId? : Measure that triggered the activation}
-                                {--turn=on : Turn Fan on or off} 
-                                {--time=1 : Time the Fan will be on or off in minutes}';
+                                {--turn=on : Turn on or off} 
+                                {--time=1 : Time the Extractor will be on or off in minutes}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Switch Fan on or off';
-
-    /**
-     * The device to command interacts with.
-     *
-     * @var string
-     */
-    public $device = Activation::DEVICE_FAN;
+    protected $description = 'Switch devices on or off';
 
     /**
      * Execute the console command.
@@ -44,38 +38,48 @@ class Fan extends Command
      */
     public function handle()
     {
+        $deviceName = $this->argument('device');
         $turnOn = $this->option('turn') === 'on';
         $time = $this->option('time');
+
+        $devicePin = Activation::DEVICE_PINS[$deviceName];
+
+        if (!$devicePin) {
+            return Command::FAILURE;
+        }
 
         // Create a new instance of the GPIO class.
         $gpio = new GPIO();
 
-        // Configure our 'Fan' output...
-        $fan = $gpio->pin(Activation::DEVICE_PINS[$this->device], GPIO::OUT);
+        // Configure our device output...
+        $device = $gpio->pin($devicePin, GPIO::OUT);
 
         if ($turnOn) {
             $activation = Activation::create([
                 'activated_by' => $this->getActivationCause(),
                 'measure_id' => $this->getActivationMeasureId(),
-                'device' => $this->device,
+                'device' => $deviceName,
                 'amount' => $time,
                 'measure_unit' => Activation::UNIT_MINUTES,
             ]);
 
-            $fan->setValue(GPIO::HIGH);
-            $this->info('Fan is on');
-            logger('Turning on Fan for ' . $time . ' minutes');
+
+            logger("Turning on $deviceName for: $time minutes");
+            $device->setValue(GPIO::LOW); // as the relay is active low
+            $this->info("$deviceName is on");
             sleep($time * 60);
-            $fan->setValue(GPIO::LOW);
-            $this->info('Fan is off');
-            logger('Turning off Fan');
+            logger("Turning off $deviceName");
+            $device->setValue(GPIO::HIGH);
+            $this->info("$deviceName is off");
 
             $activation->active_until = Date::now();
             $activation->save();
         } else {
-            $fan->setValue(GPIO::LOW);
-            $this->info('Fan is off');
-            logger('Turning off Fan');
+            logger("Turning off $deviceName");
+            $device->setValue(GPIO::HIGH);
+            $this->info("$deviceName is off");
         }
+
+        return Command::SUCCESS;
     }
 }

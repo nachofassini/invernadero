@@ -13,32 +13,20 @@ final class ActivateDevice
      */
     public function __invoke($_, array $args)
     {
-        switch ($args['device']) {
-            case Activation::DEVICE_FAN:
-                $command = 'fan:switch';
-                break;
-            case Activation::DEVICE_EXTRACTOR:
-                $command = 'extractor:switch';
-                break;
-            case Activation::DEVICE_WATER:
-                $command = 'water:switch';
-                break;
-            case Activation::DEVICE_LIGHT:
-                $command = 'led:switch';
-                break;
-        }
-
-        if (!isset($command)) {
+        $deviceName = $args['device'];
+        if (!in_array($deviceName, Activation::DEVICES)) {
             return null;
         }
 
-        $isDeviceActive = Activation::active()->where('device', $args['device'])->count() > 0;
+        $isDeviceActive = Activation::active()->where('device', $deviceName)->count() > 0;
 
         if ($isDeviceActive) {
             return null;
         }
 
-        Artisan::queue($command, ['--turn' => 'on', '--time' => $args['amount'], 'cause' => Activation::MANUAL]);
+        Artisan::queue('device:switch', [
+            'device' => $deviceName, '--turn' => 'on', '--time' => $args['amount'], 'cause' => Activation::MANUAL
+        ]);
 
         // Await queue to execute the command (it creates the activation record as soon it's executed)
         sleep(2);

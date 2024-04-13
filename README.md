@@ -15,4 +15,7 @@ Select Finish to exit.
 
 Para que las queues de laravel funcionen, setear supervisor https://laravel.com/docs/9.x/queues#supervisor-configuration or `php artisan queue:work --timeout=100`
 
+1. sudo supervisorctl start laravel-worker:\*
+1. sudo supervisorctl stop laravel-worker:\*
+
 Para que las tareas programadas funcionen, configurar scheduler https://laravel.com/docs/9.x/scheduling#running-the-scheduler or `php artisan schedule:work`

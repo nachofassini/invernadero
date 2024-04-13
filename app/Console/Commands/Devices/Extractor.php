@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Devices;
 
 use App\Console\Traits\HasActivationCause;
 use App\Models\Activation;
@@ -20,7 +20,7 @@ class Extractor extends Command
     protected $signature = 'extractor:switch 
                                 {cause : Activation cause}
                                 {measureId? : Measure that triggered the activation}
-                                {--turn=on : Turn on or off} 
+                                {--turn=on : Turn Extractor on or off} 
                                 {--time=1 : Time the Extractor will be on or off in minutes}';
 
     /**

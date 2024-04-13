@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Console\Commands\Devices;
 
 use App\Console\Traits\HasActivationCause;
 use App\Models\Activation;
@@ -8,7 +8,7 @@ use Ballen\GPIO\GPIO;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Date;
 
-class Led extends Command
+class Water extends Command
 {
     use HasActivationCause;
 
@@ -17,25 +17,25 @@ class Led extends Command
      *
      * @var string
      */
-    protected $signature = 'led:switch 
+    protected $signature = 'water:switch 
                                 {cause : Activation cause}
                                 {measureId? : Measure that triggered the activation}
                                 {--turn=on : Turn Water on or off} 
-                                {--time=1 : Time the LED will be on or off in minutes}';
+                                {--time=1 : Time the Water will be on or off in minutes}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Switch Led light on or off';
+    protected $description = 'Switch Water Pump on or off';
 
     /**
      * The device to command interacts with.
      *
      * @var string
      */
-    public $device = Activation::DEVICE_LIGHT;
+    public $device = Activation::DEVICE_WATER;
 
     /**
      * Execute the console command.
@@ -50,8 +50,8 @@ class Led extends Command
         // Create a new instance of the GPIO class.
         $gpio = new GPIO();
 
-        // Configure our 'LED' output...
-        $led = $gpio->pin(Activation::DEVICE_PINS[$this->device], GPIO::OUT);
+        // Configure our 'Water' output...
+        $water = $gpio->pin(Activation::DEVICE_PINS[$this->device], GPIO::OUT);
 
         if ($turnOn) {
             $activation = Activation::create([
@@ -62,20 +62,20 @@ class Led extends Command
                 'measure_unit' => Activation::UNIT_MINUTES,
             ]);
 
-            $led->setValue(GPIO::HIGH);
-            $this->info('Led is on');
-            logger('Turning on led for ' . $time . ' minutes');
+            $water->setValue(GPIO::HIGH);
+            $this->info('Water is on');
+            logger('Turning on Water for ' . $time . ' minutes');
             sleep($time * 60);
-            $led->setValue(GPIO::LOW);
-            $this->info('Led is off');
-            logger('Turning off led');
+            $water->setValue(GPIO::LOW);
+            $this->info('Water is off');
+            logger('Turning off Water');
 
             $activation->active_until = Date::now();
             $activation->save();
         } else {
-            $led->setValue(GPIO::LOW);
-            $this->info('Led is off');
-            logger('Turning off led');
+            $water->setValue(GPIO::LOW);
+            $this->info('Water is off');
+            logger('Turning off Water');
         }
     }
 }
