@@ -31,6 +31,13 @@ class Led extends Command
     protected $description = 'Switch Led light on or off';
 
     /**
+     * The device to command interacts with.
+     *
+     * @var string
+     */
+    public $device = Activation::DEVICE_LIGHT;
+
+    /**
      * Execute the console command.
      *
      * @return int
@@ -44,13 +51,13 @@ class Led extends Command
         $gpio = new GPIO();
 
         // Configure our 'LED' output...
-        $led = $gpio->pin(Activation::DEVICE_PINS['LIGHT'], GPIO::OUT);
+        $led = $gpio->pin(Activation::DEVICE_PINS[$this->device], GPIO::OUT);
 
         if ($turnOn) {
             $activation = Activation::create([
                 'activated_by' => $this->getActivationCause(),
                 'measure_id' => $this->getActivationMeasureId(),
-                'device' => Activation::DEVICE_LIGHT,
+                'device' => $this->device,
                 'amount' => $time,
                 'measure_unit' => Activation::UNIT_MINUTES,
             ]);

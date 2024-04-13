@@ -31,6 +31,13 @@ class Fan extends Command
     protected $description = 'Switch Fan on or off';
 
     /**
+     * The device to command interacts with.
+     *
+     * @var string
+     */
+    public $device = Activation::DEVICE_FAN;
+
+    /**
      * Execute the console command.
      *
      * @return int
@@ -44,13 +51,13 @@ class Fan extends Command
         $gpio = new GPIO();
 
         // Configure our 'Fan' output...
-        $fan = $gpio->pin(Activation::DEVICE_PINS['FAN'], GPIO::OUT);
+        $fan = $gpio->pin(Activation::DEVICE_PINS[$this->device], GPIO::OUT);
 
         if ($turnOn) {
             $activation = Activation::create([
                 'activated_by' => $this->getActivationCause(),
                 'measure_id' => $this->getActivationMeasureId(),
-                'device' => Activation::DEVICE_FAN,
+                'device' => $this->device,
                 'amount' => $time,
                 'measure_unit' => Activation::UNIT_MINUTES,
             ]);
