@@ -13,6 +13,7 @@ final class ActivateDevice
      */
     public function __invoke($_, array $args)
     {
+        logger('ActivateDevice', $args);
         $deviceName = $args['device'];
         if (!in_array($deviceName, Activation::DEVICES)) {
             return null;

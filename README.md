@@ -2,9 +2,27 @@
 
 Cada vez que se reinicia:
 
-1. chequear nameserver en /etc/resolv.conf. Comentar la linea 127.0.0.1 y agregar `nameserver 8.8.8.8`
-1. sudo pigpiod (para q funcione activar puertos GPIO desde php, sino: "socket_connect() failed ():Connection refused")
+1. chequear nameserver en `/etc/resolv.conf`. Comentar la linea 127.0.0.1 y agregar `nameserver 8.8.8.8`
 1. sudo php artisan serve --port 80 --host 192.168.0.47 (reemplazar con la ip local)
+
+Activar pigpiod (para q funcione activar puertos GPIO desde php, sino: "socket_connect() failed ():Connection refused")
+
+1. (antes) sudo pigpiod
+1. (ahora): se creó un servicio en `/etc/systemd/system/pigpiod.service` y luego (sudo systemctl enable pigpiod, sudo systemctl start pigpiod)
+
+```bash
+  [Unit]
+  Description=Pigpio daemon
+  After=network.target
+
+  [Service]
+  ExecStart=/usr/local/bin/pigpiod
+  ExecStop=/bin/systemctl kill -s SIGKILL pigpiod
+  Type=forking
+
+  [Install]
+  WantedBy=multi-user.target
+```
 
 For MCP3008 to work, need to enable the SPI interface on the Raspberry Pi with raspi-config:
 Run sudo raspi-config.
