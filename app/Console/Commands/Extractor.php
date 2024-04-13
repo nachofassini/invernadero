@@ -31,6 +31,13 @@ class Extractor extends Command
     protected $description = 'Switch Extractor on or off';
 
     /**
+     * The device to command interacts with.
+     *
+     * @var string
+     */
+    public $device = Activation::DEVICE_EXTRACTOR;
+
+    /**
      * Execute the console command.
      *
      * @return int
@@ -44,13 +51,13 @@ class Extractor extends Command
         $gpio = new GPIO();
 
         // Configure our 'Extractor' output...
-        $extractor = $gpio->pin(Activation::DEVICE_PINS['EXTRACTOR'], GPIO::OUT);
+        $extractor = $gpio->pin(Activation::DEVICE_PINS[$this->device], GPIO::OUT);
 
         if ($turnOn) {
             $activation = Activation::create([
                 'activated_by' => $this->getActivationCause(),
                 'measure_id' => $this->getActivationMeasureId(),
-                'device' => Activation::DEVICE_EXTRACTOR,
+                'device' => $this->device,
                 'amount' => $time,
                 'measure_unit' => Activation::UNIT_MINUTES,
             ]);

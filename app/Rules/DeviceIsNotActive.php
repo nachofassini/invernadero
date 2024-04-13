@@ -26,7 +26,7 @@ class DeviceIsNotActive implements Rule
      */
     public function passes($attribute, $device)
     {
-        return Activation::where('device', $device)->whereNull('active_until')->count() === 0;
+        return Activation::where('device', $device)->active()->count() === 0;
     }
 
     /**

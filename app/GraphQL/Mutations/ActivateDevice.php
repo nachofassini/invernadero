@@ -13,8 +13,6 @@ final class ActivateDevice
      */
     public function __invoke($_, array $args)
     {
-        $manualActivation = Activation::MANUAL;
-
         switch ($args['device']) {
             case Activation::DEVICE_FAN:
                 $command = 'fan:switch';
@@ -34,7 +32,13 @@ final class ActivateDevice
             return null;
         }
 
-        Artisan::queue($command, ['--turn' => 'on', '--time' => $args['amount'], 'cause' => $manualActivation]);
+        $isDeviceActive = Activation::active()->where('device', $args['device'])->count() > 0;
+
+        if ($isDeviceActive) {
+            return null;
+        }
+
+        Artisan::queue($command, ['--turn' => 'on', '--time' => $args['amount'], 'cause' => Activation::MANUAL]);
 
         // Await queue to execute the command (it creates the activation record as soon it's executed)
         sleep(2);

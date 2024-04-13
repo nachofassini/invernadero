@@ -37,10 +37,10 @@ class Activation extends Model
     ];
 
     const DEVICE_PINS = [
-        'FAN' => 6,
-        'EXTRACTOR' => 13,
-        'LIGHT' => 19,
-        'WATER' => 26,
+        self::DEVICE_FAN => 6,
+        self::DEVICE_EXTRACTOR => 13,
+        self::DEVICE_LIGHT => 19,
+        self::DEVICE_WATER => 26,
     ];
 
     const UNIT_MILLIMETERS = 'mm3';
@@ -115,6 +115,17 @@ class Activation extends Model
         $sunriseTime->setTimezone(new DateTimeZone('America/Argentina/Salta'));
 
         return $sunriseTime;
+    }
+
+    /**
+     * Scope to get latests
+     *
+     * @param  Builder  $query
+     * @return Builder
+     */
+    public function scopeActive(Builder $query)
+    {
+        return $query->whereNull('active_until');
     }
 
     /**
