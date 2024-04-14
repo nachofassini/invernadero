@@ -27,7 +27,7 @@ class ActivationSeeder extends Seeder
         Activation::factory()->create([
             "measure_id" => $newMeasure->id,
             'device' => 'fan',
-            'activated_by' => 'high_temp',
+            'activated_by' => Activation::HIGH_TEMPERATURE,
             'amount' => 5.5,
             'measure_unit' => 'Mins.',
             'active_until' => $now->addMinutes(5),

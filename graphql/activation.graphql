@@ -6,8 +6,8 @@ enum Device {
 }
 
 enum ActivationType {
-    low_temp
-    high_temp
+    low_temperature
+    high_temperature
     low_humidity
     high_humidity
     low_soil_humidity

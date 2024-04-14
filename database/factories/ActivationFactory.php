@@ -29,12 +29,12 @@ class ActivationFactory extends Factory
         return [
             'active_until' => function (array $attributes) {
                 return fake()->dateTimeBetween($attributes['created_at'], Carbon::parse($attributes['created_at'])->addHour());
-            },    
-            'device' => fake()->randomElement(['fan', 'extractor', 'light', 'irrigation']),
-            'activated_by' => fake()->randomElement(['low_temp', 'high_temp', 'low_humidity', 'high_humidity', 'low_soil_humidity', 'high_soil_humidity', 'low_lighting', 'low_co2', 'high_co2', 'manual']),
+            },
+            'device' => fake()->randomElement(Activation::DEVICES),
+            'activated_by' => fake()->randomElement(Activation::TYPES),
             'measure_id' => Measure::factory(),
             'amount' => fake()->randomFloat(1, 0, 1200),
-            'measure_unit' => fake()->randomElement(['mm3', 'm3', '%', 'Hs.', 'Mins.', 'ppm', 'ºC']),
+            'measure_unit' => fake()->randomElement(Activation::MEASURE_UNITS),
         ];
     }
 }
