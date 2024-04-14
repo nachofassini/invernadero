@@ -53,7 +53,7 @@ type Mutation {
                 ]
             )
     ): Crop!
-    deactivateCrop: Int!
+    deactivateCrop: Crop!
     upsertCrop(data: CropInput! @spread): Crop! @upsert
     deleteCrop(id: ID! @rules(apply: ["exists:crops"]) @eq): Crop! @delete
 }

@@ -24,6 +24,16 @@ class Crop extends Model
     ];
 
     /**
+     * Deactivates current crop
+     */
+    public function deactivate()
+    {
+        $this->active_since = null;
+        $this->save();
+        return $this;
+    }
+
+    /**
      * Retrieves current crop status
      */
     public function getActiveAttribute()
@@ -98,7 +108,7 @@ class Crop extends Model
     }
 
     /**
-     * Scope a query to only include popular users.
+     * Scope a query to only include active crops
      *
      * @param  Builder  $query
      * @return Builder

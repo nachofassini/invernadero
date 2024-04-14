@@ -12,6 +12,14 @@ final class DeactivateCrop
      */
     public function __invoke($_, array $args)
     {
-        return Crop::whereNotNull('active_since')->update(["active_since" => null]);
+        $crop =  Crop::active()->first();
+
+        if (!$crop) {
+            return null;
+        }
+
+        $crop->deactivate();
+
+        return $crop;
     }
 }
