@@ -19,9 +19,9 @@ class MeasureObserver
 
         $activeCrop = Crop::active()->first();
 
-        if (!$activeCrop) {
-            logger('No active crop');
-            return true;
+        if (!$activeCrop || !$activeCrop->activeStage) {
+            logger('No active crop / stage');
+            return;
         }
 
         $activeCrop->handlePlanDeviations($measure);
