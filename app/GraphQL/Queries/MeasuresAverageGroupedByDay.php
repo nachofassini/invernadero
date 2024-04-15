@@ -14,8 +14,8 @@ final class MeasuresAverageGroupedByDay
      */
     public function __invoke($_, array $args)
     {
-        $from = ($args['created_at']['from'])->toDateTimeString();
-        $to = ($args['created_at']['to'])->toDateTimeString();
+        $from = ($args['created_at']['from'])->startOfDay()->toDateTimeString();
+        $to = ($args['created_at']['to'])->endOfDay()->toDateTimeString();
 
         return Measure::whereBetween('created_at', [$from, $to])
             ->select(
