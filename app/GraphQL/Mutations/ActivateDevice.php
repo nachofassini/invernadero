@@ -27,9 +27,6 @@ final class ActivateDevice
 
         ActivateDeviceJob::dispatchSync($deviceName, Activation::MANUAL, $args['amount']);
 
-        // Await queue to execute the command (it creates the activation record as soon it's executed)
-        // sleep(3);
-
         return Activation::latest()->first();
     }
 }
