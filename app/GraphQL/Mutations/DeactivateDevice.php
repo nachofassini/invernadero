@@ -2,9 +2,8 @@
 
 namespace App\GraphQL\Mutations;
 
+use App\Jobs\DeactivateDevice as DeactivateDeviceJob;
 use App\Models\Activation;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Artisan;
 
 final class DeactivateDevice
 {
@@ -19,13 +18,14 @@ final class DeactivateDevice
             return null;
         }
 
-        Artisan::queue('device:switch', [
-            'device' => $deviceName, '--turn' => 'off', 'cause' => Activation::MANUAL
-        ]);
+        $activation = Activation::where('device', $args["device"])->active()->first();
 
-        // Await queue to execute the command (it creates the activation record as soon it's executed)
-        sleep(2);
+        if (!$activation) {
+            return null;
+        }
 
-        return Activation::where('device', $args["device"])->whereNull('active_until')->update(["active_until" => Carbon::now()]);
+        DeactivateDeviceJob::dispatchSync($activation);
+
+        return $activation->fresh();
     }
 }

@@ -37,3 +37,35 @@ Para que las queues de laravel funcionen, setear supervisor https://laravel.com/
 1. sudo supervisorctl stop laravel-worker:\*
 
 Para que las tareas programadas funcionen, configurar scheduler https://laravel.com/docs/9.x/scheduling#running-the-scheduler or `php artisan schedule:work`
+
+### Web server
+
+Se creó un servicio para correr `php artisan serve` automaticamente
+
+```
+[Unit]
+Description=Artisan Serve
+
+[Service]
+ExecStart=/usr/bin/php /home/ubuntu/invernadero/artisan serve --host=0.0.0.0 --port=8000
+WorkingDirectory=/home/ubuntu/invernadero
+User=root
+Group=root
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+-   sudo systemctl enable artisan-serve
+-   sudo systemctl start artisan-serve
+-   sudo systemctl stop artisan-serve
+
+Se desactivaron dos servicios de laravel valet
+sudo systemctl disable php8.1-fpm.service
+sudo systemctl disable dnsmasq
+sudo systemctl start nginx
+
+### Restart queues after deploying
+
+php artisan queue:restart

@@ -41,7 +41,7 @@ class ReadSensors extends Command
      */
     public function handle()
     {
-        $measure = new Measure();
+        $measure = new Measure(['created_at' => now()]);
 
         // external lightning
         $output = new BufferedOutput();

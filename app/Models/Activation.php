@@ -98,6 +98,12 @@ class Activation extends Model
         'measure_unit',
     ];
 
+    public function deactivate()
+    {
+        $this->active_until = now();
+        return $this->save();
+    }
+
     public function getEnabledAttribute()
     {
         return $this->active_until === null;

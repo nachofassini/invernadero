@@ -11,6 +11,24 @@ class Measure extends Model
     use HasFactory;
 
     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'created_at',
+        'updated_at',
+        'consumption',
+        'inside_temperature',
+        'outside_temperature',
+        'inside_humidity',
+        'outside_humidity',
+        'soil_humidity',
+        'co2',
+        'lighting',
+    ];
+
+    /**
      * The attributes that should be cast.
      *
      * @var array

@@ -2,8 +2,8 @@
 
 namespace App\GraphQL\Mutations;
 
+use App\Jobs\ActivateDevice as ActivateDeviceJob;
 use App\Models\Activation;
-use Illuminate\Support\Facades\Artisan;
 
 final class ActivateDevice
 {
@@ -25,12 +25,10 @@ final class ActivateDevice
             return null;
         }
 
-        Artisan::queue('device:switch', [
-            'device' => $deviceName, '--turn' => 'on', '--time' => $args['amount'], 'cause' => Activation::MANUAL
-        ]);
+        ActivateDeviceJob::dispatchSync($deviceName, Activation::MANUAL, $args['amount']);
 
         // Await queue to execute the command (it creates the activation record as soon it's executed)
-        sleep(2);
+        // sleep(3);
 
         return Activation::latest()->first();
     }

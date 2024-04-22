@@ -61,7 +61,7 @@ type Activation {
     measureUnit: MeasureUnit @rename(attribute: "measure_unit")
 
     "Active end date"
-    activeUntil: Date @rename(attribute: "active_until")
+    activeUntil: DateTime @rename(attribute: "active_until")
     createdAt: DateTime! @rename(attribute: "created_at")
     updatedAt: DateTime! @rename(attribute: "updated_at")
 }
@@ -104,5 +104,5 @@ extend type Mutation {
         device: Device! @rules(apply: ["App\\Rules\\DeviceIsNotActive"])
         amount: Float!
     ): Activation!
-    deactivateDevice(device: Device!): Int!
+    deactivateDevice(device: Device!): Activation!
 }
