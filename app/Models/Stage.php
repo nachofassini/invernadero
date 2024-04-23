@@ -74,14 +74,34 @@ class Stage extends Model
 
         $rangeStart = 0;
         foreach ($this->crop->stages as $stage) {
-            // TODO use stage init and end date instead of day number (to be more accurate)
+            // TODO use stage init and end date instead of day number (to be more accurate)?
             if ($cropDaysActive >= $rangeStart && $cropDaysActive < ($rangeStart + $stage->days)) {
-                return $cropDaysActive - $rangeStart + 1;
+                return $cropDaysActive - $rangeStart;
             }
             $rangeStart += $stage->days;
         }
 
         return 0;
+    }
+
+    /**
+     * Retrieves the date where the stage will became active
+     * @return Date
+     */
+    public function getActiveFromAttribute()
+    {
+        if (!$this->crop->active || !array_key_exists($this->id, $this->crop->stageRanges)) return null;
+        return $this->crop->stageRanges[$this->id]['from'];
+    }
+
+    /**
+     * Retrieves the date where the stage will became inactive
+     * @return Date
+     */
+    public function getActiveToAttribute()
+    {
+        if (!$this->crop->active || !array_key_exists($this->id, $this->crop->stageRanges)) return null;
+        return $this->crop->stageRanges[$this->id]['to'];
     }
 
     /**

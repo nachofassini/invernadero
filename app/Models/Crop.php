@@ -6,6 +6,7 @@ use App\Models\Traits\CalculatesPlanDeviations;
 use App\Models\Traits\FixPlanDeviations;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,6 +22,7 @@ class Crop extends Model
     protected $casts = [
         'name' => 'string',
         'active_since' => 'datetime',
+        'active_until' => 'datetime',
     ];
 
     /**
@@ -38,19 +40,19 @@ class Crop extends Model
      */
     public function getActiveAttribute()
     {
-        return $this->active_since != null;
+        return $this->active_since && $this->active_since->isPast() && $this->active_until->isFuture();
     }
 
     /**
      * Retrieves active crop cultivation end date
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
-    public function getActiveUntilAttribute()
+    protected function activeUntil(): Attribute
     {
-        if (!$this->active) {
-            return null;
-        }
-
-        return $this->active_since->addDays($this->days);
+        return Attribute::make(
+            get: fn ($value, $attributes) => $attributes['active_since'] ? (new Carbon($attributes['active_since']))->addDays($this->days) : null,
+        );
     }
 
     /**
@@ -58,18 +60,20 @@ class Crop extends Model
      */
     public function getDayAttribute()
     {
-        if (!$this->active) {
-            return 0;
-        }
-        return Carbon::now()->diff($this->active_since)->days + 1;
+        if (!$this->active) return 0;
+        return Carbon::now()->diff($this->active_since)->days;
     }
 
     /**
      * Retrieves crop total days
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
      */
-    public function getDaysAttribute()
+    protected function days(): Attribute
     {
-        return $this->stages()->sum('days');
+        return Attribute::make(
+            get: fn () => $this->stages()->sum('days'),
+        );
     }
 
     /**
@@ -92,6 +96,32 @@ class Crop extends Model
         }
 
         return null;
+    }
+
+    /**
+     * Retrieves the date where the stage will became active
+     * @return []
+     */
+    public function getStageRangesAttribute()
+    {
+        if (!$this->active) return null;
+
+        $ranges = [];
+        $rangeStart = $this->active_since;
+        foreach ($this->stages as $stage) {
+            $rangeEnd = $rangeStart->copy()->addDays($stage->days);
+
+            $ranges[$stage->id] = [
+                'id' => $stage->id,
+                'name' => $stage->name,
+                'from' => $rangeStart,
+                'to' => $rangeEnd,
+            ];
+
+            $rangeStart = $rangeEnd;
+        }
+
+        return $ranges;
     }
 
     /**

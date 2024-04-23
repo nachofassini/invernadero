@@ -44,6 +44,9 @@ class ActivateDevice implements ShouldQueue
      */
     public function handle()
     {
+        // TODO: If device is already active because of a weather correction, it should not create an activation record and the deactivate job should be delayed by the new time
+        // if (Activation::where('device', $this->deviceName)->whereNotNull('measure_id')->active()->exists()) {}
+
         $activation = Activation::create([
             'activated_by' => $this->cause,
             'measure_id' => $this->measureId,

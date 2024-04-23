@@ -25,6 +25,12 @@ type Stage implements WeatherSetup {
     "Stage duration"
     days: Int!
 
+    "Retrieves the date where the stage will became active"
+    activeFrom: DateTime
+
+    "Retrieves the date where the stage will became inactive"
+    activeTo: DateTime
+
     "Minimum temperature"
     minTemperature: Float! @rename(attribute: "min_temperature")
 
