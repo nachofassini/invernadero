@@ -66,6 +66,13 @@ sudo systemctl disable php8.1-fpm.service
 sudo systemctl disable dnsmasq
 sudo systemctl start nginx
 
-### Restart queues after deploying
+### Steps after deploying
 
-php artisan queue:restart
+1. cd /home/ubuntu/invernadero
+1. sudo systemctl stop artisan-serve
+1. php artisan down
+1. git pull origin master
+1. sudo php artisan cache:clear
+1. php artisan queue:restart
+1. php artisan up
+1. sudo systemctl start artisan-serve
