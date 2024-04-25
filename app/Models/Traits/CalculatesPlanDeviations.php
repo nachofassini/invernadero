@@ -33,7 +33,7 @@ trait CalculatesPlanDeviations
     }
     if ($measure->inside_temperature > $maximumTemperatureLimit) {
       logger("Temperature is higher than expected. Expected: {$maxTemperature}. Obtained: $measure->inside_temperature");
-      return ['type' => Activation::HIGH_TEMPERATURE, 'expected' => $minTemperature, 'obtained' => $measure->inside_temperature];
+      return ['type' => Activation::HIGH_TEMPERATURE, 'expected' => $maxTemperature, 'obtained' => $measure->inside_temperature];
     }
   }
 
