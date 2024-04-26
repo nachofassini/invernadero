@@ -69,10 +69,10 @@ sudo systemctl start nginx
 ### Steps after deploying
 
 1. cd /home/ubuntu/invernadero
-1. sudo systemctl stop artisan-serve
+1. sudo systemctl stop artisan-serve (prob innecesario)
 1. php artisan down
 1. git pull origin master
 1. sudo php artisan cache:clear
 1. php artisan queue:restart
 1. php artisan up
-1. sudo systemctl start artisan-serve
+1. sudo systemctl start artisan-serve (prob innecesario)

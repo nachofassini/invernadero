@@ -109,11 +109,15 @@ class Activation extends Model
 
     public function deactivate()
     {
+        // Queued deactivations might try to deactivate a device that was manually deactivated
+        if (!$this->active) return;
+
         Artisan::queue(SwitchDevice::class, ['device' => $this->device, '--turn' => 'off']);
 
         $this->active_until = now();
         $interval = $this->created_at->diff($this->active_until);
         $this->amount = $interval->i;
+        $this->measure_unit = self::UNIT_MINUTES;
         $this->save();
 
         return $this->fresh();
