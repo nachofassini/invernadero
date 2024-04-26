@@ -41,10 +41,6 @@ class DeactivateDevice implements ShouldQueue
      */
     public function handle()
     {
-        if ($this->activation->enabled) {
-            $this->activation->deactivate();
-        }
-        // Trigger device off event though the activation is not enabled in the database (in case device state is not in synced)
-        Artisan::call(SwitchDevice::class, ['device' => $this->activation->device, '--turn' => 'off']);
+        $this->activation->deactivate();
     }
 }

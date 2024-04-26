@@ -35,6 +35,14 @@ enum DeviceMeasureUnits {
     IRRIGATION @enum(value: "mm3")
 }
 
+type Deviation {
+    "Expected value"
+    expected: Float!
+
+    "Obtained value"
+    obtained: Float!
+}
+
 type Activation {
     "Unique primary key."
     id: ID!
@@ -44,6 +52,9 @@ type Activation {
 
     "Activation trigger motive"
     activatedBy: ActivationType @rename(attribute: "activated_by")
+
+    "Deviation detected"
+    deviation: Deviation
 
     "Current status"
     enabled: Boolean!
@@ -55,15 +66,16 @@ type Activation {
     measure: Measure
 
     "value of the amount of water/ minutes of vent / hs of light delivered / etc..."
-    amount: Float!
+    amount: Float
 
     "measure unit for the amount delivered (mm3 for water, mins for vent, hs for lighting, etc.."
     measureUnit: MeasureUnit @rename(attribute: "measure_unit")
 
-    "Active end date"
-    activeUntil: DateTime @rename(attribute: "active_until")
     createdAt: DateTime! @rename(attribute: "created_at")
     updatedAt: DateTime! @rename(attribute: "updated_at")
+
+    "Active end date"
+    activeUntil: DateTime @rename(attribute: "active_until")
 }
 
 type ActivationsGroupedByDevice {
@@ -101,8 +113,22 @@ extend type Query {
 
 extend type Mutation {
     activateDevice(
-        device: Device! @rules(apply: ["App\\Rules\\DeviceIsNotActive"])
-        amount: Float!
+        device: Device!
+            @rules(
+                apply: [
+                    "App\\Rules\\IsValidDevice"
+                    "App\\Rules\\DeviceIsNotActive"
+                ]
+            )
+        amount: Float! @rules(apply: ["required", "numeric", "min:1"])
+    ): Activation! @create
+    deactivateDevice(
+        device: Device!
+            @rules(
+                apply: [
+                    "App\\Rules\\IsValidDevice"
+                    "App\\Rules\\DeviceIsActive"
+                ]
+            )
     ): Activation!
-    deactivateDevice(device: Device!): Activation!
 }

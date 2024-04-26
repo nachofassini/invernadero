@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Console\Commands\SwitchDevice;
+use App\Jobs\DeactivateDevice;
 use DateTime;
 use DateTimeZone;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\AsArrayObject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Artisan;
 
 class Activation extends Model
 {
@@ -82,6 +86,7 @@ class Activation extends Model
         'active_until' => 'datetime',
         'device' => 'string',
         'activated_by' => 'string',
+        'deviation' => AsArrayObject::class,
         'measure_id' => 'integer',
         'amount' => 'double',
         'measure_unit' => 'string',
@@ -94,14 +99,24 @@ class Activation extends Model
         'activated_by',
         'measure_id',
         'device',
+        'deviation',
+        'deviation->expected',
+        'deviation->obtained',
         'amount',
         'measure_unit',
+        'fix_id' => 'integer',
     ];
 
     public function deactivate()
     {
+        Artisan::queue(SwitchDevice::class, ['device' => $this->device, '--turn' => 'off']);
+
         $this->active_until = now();
-        return $this->save();
+        $interval = $this->created_at->diff($this->active_until);
+        $this->amount = $interval->i;
+        $this->save();
+
+        return $this->fresh();
     }
 
     public function getEnabledAttribute()
@@ -165,5 +180,41 @@ class Activation extends Model
     public function measure()
     {
         return $this->belongsTo(Measure::class);
+    }
+
+    /**
+     * Get the measure that fixed this activation
+     */
+    public function fix()
+    {
+        return $this->belongsTo(Measure::class);
+    }
+
+    /**
+     * @return void
+     */
+    protected static function booted()
+    {
+        static::creating(function ($activation) {
+            // If there's an active record for the same device, don't activate the device
+            if (self::active()->whereDevice($activation->device)->get()->count()) {
+                return false;
+            }
+
+            if (!$activation->activated_by) {
+                $activation->activated_by = self::MANUAL;
+            }
+
+            return $activation;
+        });
+
+        static::created(function ($activation) {
+            Artisan::queue(SwitchDevice::class, ['device' => $activation->device, '--turn' => 'on']);
+
+            // Only manual activations will set a timeout to deactivate the device 
+            if ($activation->amount) {
+                DeactivateDevice::dispatch($activation)->delay(now()->addSeconds($activation->amount * 60));
+            }
+        });
     }
 }

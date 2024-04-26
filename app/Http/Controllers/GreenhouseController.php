@@ -9,6 +9,8 @@ class GreenhouseController extends Controller
 {
     public function index()
     {
+        return true;
+
         $lastMeasure = Measure::latest()->first();
 
         $activeCrop = Crop::active()->first();
