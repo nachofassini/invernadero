@@ -130,11 +130,27 @@ class Crop extends Model
      */
     public function handlePlanDeviations(Measure $measure)
     {
-        $deviations = $this->getPlanDeviations($measure);
+        $activeCorrections = Activation::active()->get();
+        logger('Active corrections', $activeCorrections->toArray());
 
-        logger('Plan deviations', $deviations);
+        $detectedDeviations = collect($this->getPlanDeviations($measure));
+        logger('Plan deviations', $detectedDeviations->toArray());
 
-        $this->fixDeviations($deviations, $measure);
+        $deviationsToFix = $detectedDeviations->reject(function ($deviation) use ($activeCorrections) {
+            return $activeCorrections->pluck('activated_by')->contains($deviation['type']);
+        });
+        $deviationsFixed = $activeCorrections->filter(function ($activeCorrection) use ($detectedDeviations) {
+            return !$detectedDeviations->pluck('type')->contains($activeCorrection->activated_by);
+        });
+        $deviationsInProgress = $activeCorrections->except($deviationsFixed->pluck('id')->toArray());
+
+        logger('Deviations to fix', $deviationsToFix->toArray());
+        $this->fixDeviations($deviationsToFix, $measure);
+
+        logger('Corrections to deactivate', $deviationsFixed->toArray());
+        $deviationsFixed->each(fn ($activeCorrection) => $activeCorrection->deactivate());
+
+        logger('Corrections still in progress', $deviationsInProgress->toArray());
     }
 
     /**

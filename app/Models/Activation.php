@@ -110,7 +110,7 @@ class Activation extends Model
     public function deactivate()
     {
         // Queued deactivations might try to deactivate a device that was manually deactivated
-        if (!$this->active) return;
+        if (!$this->enabled) return;
 
         Artisan::queue(SwitchDevice::class, ['device' => $this->device, '--turn' => 'off']);
 
