@@ -20,6 +20,8 @@ trait CalculatesPlanDeviations
 {
   private function getTemperatureDeviations(Measure $measure)
   {
+    if ($measure->inside_temperature === null || $measure->inside_temperature = 0) return; // ignore bad readings
+
     $minTemperature = $this->activeStage->min_temperature;
     $maxTemperature = $this->activeStage->max_temperature;
 
@@ -39,6 +41,8 @@ trait CalculatesPlanDeviations
 
   private function getHumidityDeviations(Measure $measure)
   {
+    if ($measure->inside_humidity === null || $measure->inside_humidity = 0) return; // ignore bad readings
+
     $minHumidity = $this->activeStage->min_humidity;
     $maxHumidity = $this->activeStage->max_humidity;
 
