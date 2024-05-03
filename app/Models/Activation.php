@@ -107,7 +107,10 @@ class Activation extends Model
         'fix_id' => 'integer',
     ];
 
-    public function deactivate()
+    /**
+     * @param Measure|null $measure
+     */
+    public function deactivate(Measure|null $measure)
     {
         // Queued deactivations might try to deactivate a device that was manually deactivated
         if (!$this->enabled) return;
@@ -118,6 +121,9 @@ class Activation extends Model
         $interval = $this->created_at->diff($this->active_until);
         $this->amount = $interval->i;
         $this->measure_unit = self::UNIT_MINUTES;
+        if ($measure && $measure->id) {
+            $this->fix_id = $measure->id;
+        }
         $this->save();
 
         return $this->fresh();

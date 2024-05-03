@@ -148,7 +148,7 @@ class Crop extends Model
         $this->fixDeviations($deviationsToFix, $measure);
 
         logger('Corrections to deactivate', $deviationsFixed->toArray());
-        $deviationsFixed->each(fn ($activeCorrection) => $activeCorrection->deactivate());
+        $deviationsFixed->each(fn ($activeCorrection) => $activeCorrection->deactivate($measure));
 
         logger('Corrections still in progress', $deviationsInProgress->toArray());
     }
