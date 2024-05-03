@@ -64,7 +64,8 @@ WantedBy=multi-user.target
 Se desactivaron dos servicios de laravel valet
 sudo systemctl disable php8.1-fpm.service
 sudo systemctl disable dnsmasq
-sudo systemctl start nginx
+sudo systemctl disable apache2
+sudo systemctl disable nginx
 
 ### Steps after deploying
 
@@ -76,3 +77,8 @@ sudo systemctl start nginx
 1. php artisan queue:restart
 1. php artisan up
 1. sudo systemctl start artisan-serve (prob innecesario)
+
+### NGRok
+
+Before: manually run `ngrok http 80 --config=/home/ubuntu/.config/ngrok/ngrok.yml --domain prepared-suitably-jay.ngrok-free.app`
+Now: created a service at `/etc/systemd/system/ngrok.service` -> started whit the system with `sudo systemctl enable ngrok` - also use start/stop
