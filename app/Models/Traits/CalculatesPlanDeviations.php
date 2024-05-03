@@ -20,7 +20,7 @@ trait CalculatesPlanDeviations
 {
   private function getTemperatureDeviations(Measure $measure)
   {
-    if ($measure->inside_temperature === null || $measure->inside_temperature = 0) return; // ignore bad readings
+    if ($measure->inside_temperature === null || $measure->inside_temperature === 0) return; // ignore bad readings
 
     $minTemperature = $this->activeStage->min_temperature;
     $maxTemperature = $this->activeStage->max_temperature;
@@ -41,7 +41,7 @@ trait CalculatesPlanDeviations
 
   private function getHumidityDeviations(Measure $measure)
   {
-    if ($measure->inside_humidity === null || $measure->inside_humidity = 0) return; // ignore bad readings
+    if ($measure->inside_humidity === null || $measure->inside_humidity === 0) return; // ignore bad readings
 
     $minHumidity = $this->activeStage->min_humidity;
     $maxHumidity = $this->activeStage->max_humidity;
@@ -79,7 +79,11 @@ trait CalculatesPlanDeviations
     $sunriseTime = new Carbon($sunriseTime);
     $localTIme = Date::now();
 
-    if ($measure->lighting < MIN_DAYLIGHT_LIGHTNING && $sunriseTime->diffInHours($localTIme) < $this->activeStage->light_hours) {
+    if (
+      $measure->lighting < MIN_DAYLIGHT_LIGHTNING && // if lightning is lower than expected
+      $localTIme->gte($sunriseTime) && // and it's after sunrise
+      $sunriseTime->diffInHours($localTIme) < $this->activeStage->light_hours // and it's been less than the expected light hours
+    ) {
       logger("Lightning is lower than expected. Expected > " . MIN_DAYLIGHT_LIGHTNING . ". Obtained: $measure->lighting");
       return ['type' => Activation::LOW_LIGHTING, 'expected' => MIN_DAYLIGHT_LIGHTNING, 'obtained' => $measure->lighting];
     }
