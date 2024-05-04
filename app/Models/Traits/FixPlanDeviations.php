@@ -36,7 +36,8 @@ trait FixPlanDeviations
   {
     if ($deviation['type'] === Activation::LOW_TEMPERATURE) {
       // need to heat up
-      if ($this->measure->outside_temperature > $deviation['obtained']) {
+      $requiredOutsideTemperature = $deviation['obtained'] + $deviation['obtained'] * TEMPERATURE_THRESHOLD;
+      if ($this->measure->outside_temperature > $requiredOutsideTemperature) {
         // it's hotter outside. Use outside temperature air to heat up
         logger('Activando ventilador para calentar usando el aire exterior');
         $this->activateDevice(Activation::DEVICE_FAN, $deviation);
@@ -46,7 +47,8 @@ trait FixPlanDeviations
       }
     } else {
       // need to cool down
-      if ($this->measure->outside_temperature < $deviation['obtained']) {
+      $requiredOutsideTemperature = $deviation['obtained'] - $deviation['obtained'] * TEMPERATURE_THRESHOLD;
+      if ($this->measure->outside_temperature < $requiredOutsideTemperature) {
         // it's colder outside. Use outside air temperature to cool down inside
         logger('Activando ventilador para enfriar con el aire fresco del exteriór');
         $this->activateDevice(Activation::DEVICE_FAN, $deviation);
@@ -62,7 +64,8 @@ trait FixPlanDeviations
   {
     if ($deviation['type'] === Activation::LOW_HUMIDITY) {
       // need to increase humidity
-      if ($this->measure->outside_humidity > $deviation['obtained']) {
+      $requiredOutsideHumidity = $deviation['obtained'] + $deviation['obtained'] * HUMIDITY_THRESHOLD;
+      if ($this->measure->outside_humidity > $requiredOutsideHumidity) {
         // it's more humid outside. Use outside air humidity to increase inside humidity
         logger('Activando ventilador para utilizar el aire humedo del exterior');
         $this->activateDevice(Activation::DEVICE_FAN, $deviation);
@@ -72,7 +75,8 @@ trait FixPlanDeviations
       }
     } else {
       // need to decrease humidity
-      if ($this->measure->outside_humidity < $deviation['obtained']) {
+      $requiredOutsideHumidity = $deviation['obtained'] - $deviation['obtained'] * HUMIDITY_THRESHOLD;
+      if ($this->measure->outside_humidity < $requiredOutsideHumidity) {
         // it's less humid outside. Use outside air humidity to decrease inside humidity
         logger('Activando ventilador para bajar la humedad utilizando el aire seco del exterior');
         $this->activateDevice(Activation::DEVICE_FAN, $deviation);
