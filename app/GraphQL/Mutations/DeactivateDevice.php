@@ -13,6 +13,6 @@ final class DeactivateDevice
     public function __invoke($_, array $args)
     {
         $activation = Activation::active()->whereDevice($args["device"])->get()->first();
-        return $activation->deactivate();
+        return $activation->deactivate(null);
     }
 }

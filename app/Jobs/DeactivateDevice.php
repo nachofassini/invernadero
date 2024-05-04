@@ -41,6 +41,6 @@ class DeactivateDevice implements ShouldQueue
      */
     public function handle()
     {
-        $this->activation->deactivate();
+        $this->activation->deactivate(null);
     }
 }
