@@ -29,8 +29,8 @@ final class MeasuresAverageGroupedByDay
                 DB::raw('AVG(co2) as co2'),
                 DB::raw('AVG(lighting) as lighting'),
             )
-            ->groupByRaw('Date(created_at)')
-            // ->groupByRaw('strftime("%Y-%m-%d", created_at)') // SQLite
+            // ->groupByRaw('Date(created_at)')
+            ->groupByRaw('strftime("%Y-%m-%d", created_at)') // SQLite
             ->get();
     }
 }
