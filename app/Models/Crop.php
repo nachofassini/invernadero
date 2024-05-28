@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Crop extends Model
 {
-    use CalculatesPlanDeviations, FixPlanDeviations, HasFactory;
+    use CalculatesPlanDeviations, FixPlanDeviations, HasFactory, SoftDeletes;
 
     /**
      * The attributes that should be cast.
@@ -24,6 +25,17 @@ class Crop extends Model
         'active_since' => 'datetime',
         'active_until' => 'datetime',
     ];
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        // Deactivate crop when it is deleted
+        static::deleting(function (Crop $crop) {
+            $crop->deactivate();
+        });
+    }
 
     /**
      * Deactivates current crop
