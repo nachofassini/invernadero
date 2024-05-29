@@ -17,7 +17,12 @@ final class CropInputValidator extends Validator
     {
         return [
             "id" => [],
-            "name" => ['string', 'min:3', 'max:50', Rule::unique(Crop::class, 'name')->ignore($this->arg('id'), 'id')],
+            "name" => [
+                'string',
+                'min:3',
+                'max:50',
+                Rule::unique(Crop::class, 'name')->whereNull('deleted_at')->ignore($this->arg('id'), 'id')
+            ],
         ];
     }
 
