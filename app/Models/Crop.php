@@ -35,6 +35,11 @@ class Crop extends Model
         static::deleting(function (Crop $crop) {
             $crop->deactivate();
         });
+
+        // Deactivate all weather corrections when crop is deleted
+        static::deleting(function () {
+            Activation::active()->get()->each->deactivate();
+        });
     }
 
     /**
