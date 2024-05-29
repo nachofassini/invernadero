@@ -119,7 +119,7 @@ class Activation extends Model
 
         $this->active_until = now();
         $interval = $this->created_at->diff($this->active_until);
-        $this->amount = $interval->i;
+        $this->amount = $interval->days * 24 * 60 + $interval->h * 60 + $interval->i + $interval->s / 60;
         $this->measure_unit = self::UNIT_MINUTES;
         // store the measure that triggered the deactivation
         if ($measure && $measure->id && $this->activated_by !== self::MANUAL) {
