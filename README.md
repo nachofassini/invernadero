@@ -82,3 +82,7 @@ sudo systemctl disable nginx
 
 Before: manually run `ngrok http 80 --config=/home/ubuntu/.config/ngrok/ngrok.yml --domain prepared-suitably-jay.ngrok-free.app`
 Now: created a service at `/etc/systemd/system/ngrok.service` -> started whit the system with `sudo systemctl enable ngrok` - also use start/stop
+
+
+To setup a wifi network
+add access-point settings in netplan `sudo edit /etc/netplan/50-cloud-init.yaml`, then `sudo netplan apply`
