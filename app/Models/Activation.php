@@ -3,78 +3,28 @@
 namespace App\Models;
 
 use App\Console\Commands\SwitchDevice;
-use App\Jobs\DeactivateDevice;
-use DateTime;
-use DateTimeZone;
+use App\Enums\Devices;
+use App\Enums\MeasureUnits;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\AsArrayObject;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 
 class Activation extends Model
 {
     use HasFactory;
 
-    const LOW_TEMPERATURE = 'low_temperature';
-    const HIGH_TEMPERATURE = 'high_temperature';
-    const LOW_HUMIDITY = 'low_humidity';
-    const HIGH_HUMIDITY = 'high_humidity';
-    const LOW_SOIL_HUMIDITY = 'low_soil_humidity';
-    const HIGH_SOIL_HUMIDITY = 'high_soil_humidity';
-    const LOW_CO2 = 'low_co2';
-    const HIGH_CO2 = 'high_co2';
-    const LOW_LIGHTING = 'low_lighting';
     const MANUAL = 'manual';
 
-    const DEVICE_FAN = 'fan';
-    const DEVICE_EXTRACTOR = 'extractor';
-    const DEVICE_LIGHT = 'light';
-    const DEVICE_WATER = 'irrigation';
-
-    const DEVICES = [
-        self::DEVICE_FAN,
-        self::DEVICE_EXTRACTOR,
-        self::DEVICE_LIGHT,
-        self::DEVICE_WATER,
-    ];
-
     const DEVICE_PINS = [
-        self::DEVICE_FAN => 6,
-        self::DEVICE_EXTRACTOR => 13,
-        self::DEVICE_LIGHT => 19,
-        self::DEVICE_WATER => 26,
-    ];
-
-    const UNIT_MILLIMETERS = 'mm3';
-    const UNIT_CUBIC_METERS = 'm3';
-    const UNIT_PERCENTAGE = '%';
-    const UNIT_HOURS = 'Hs.';
-    const UNIT_MINUTES = 'Mins.';
-    const UNIT_PARTS_PER_MILLION = 'ppm';
-    const UNIT_CELSIUS = 'ºC';
-
-    const MEASURE_UNITS = [
-        self::UNIT_MILLIMETERS,
-        self::UNIT_CUBIC_METERS,
-        self::UNIT_PERCENTAGE,
-        self::UNIT_HOURS,
-        self::UNIT_MINUTES,
-        self::UNIT_PARTS_PER_MILLION,
-        self::UNIT_CELSIUS,
-    ];
-
-    const TYPES = [
-        self::LOW_TEMPERATURE,
-        self::HIGH_TEMPERATURE,
-        self::LOW_HUMIDITY,
-        self::HIGH_HUMIDITY,
-        self::LOW_SOIL_HUMIDITY,
-        self::HIGH_SOIL_HUMIDITY,
-        self::LOW_CO2,
-        self::HIGH_CO2,
-        self::LOW_LIGHTING,
-        self::MANUAL,
+        Devices::FAN->value => 6,
+        Devices::EXTRACTOR->value => 13,
+        Devices::LIGHT->value => 19,
+        Devices::WATER_PUMP->value => 26,
     ];
 
     /**
@@ -84,10 +34,8 @@ class Activation extends Model
      */
     protected $casts = [
         'active_until' => 'datetime',
+        'deviation_id' => 'integer',
         'device' => 'string',
-        'activated_by' => 'string',
-        'deviation' => AsArrayObject::class,
-        'measure_id' => 'integer',
         'amount' => 'double',
         'measure_unit' => 'string',
     ];
@@ -96,136 +44,108 @@ class Activation extends Model
      * @var array
      */
     protected $fillable = [
-        'activated_by',
-        'measure_id',
+        'active_until',
+        'deviation_id',
         'device',
-        'deviation',
-        'deviation->expected',
-        'deviation->obtained',
         'amount',
         'measure_unit',
-        'fix_id' => 'integer',
     ];
 
     /**
-     * @param Measure|null $measure
+     *  Get active devices.
+     *
+     * @return Collection Activation
      */
-    public function deactivate(Measure|null $measure = null)
+    public static function getActives(): Collection
+    {
+        return self::active()->get();
+    }
+
+    public function deactivate(): self
     {
         // Queued deactivations might try to deactivate a device that was manually deactivated
-        if (!$this->enabled) return;
+        if (! $this->enabled) {
+            return $this;
+        }
 
         Artisan::queue(SwitchDevice::class, ['device' => $this->device, '--turn' => 'off']);
 
         $this->active_until = now();
         $interval = $this->created_at->diff($this->active_until);
         $this->amount = $interval->days * 24 * 60 + $interval->h * 60 + $interval->i + $interval->s / 60;
-        $this->measure_unit = self::UNIT_MINUTES;
-        // store the measure that triggered the deactivation
-        if ($measure && $measure->id && $this->activated_by !== self::MANUAL) {
-            $this->fix_id = $measure->id;
-        }
+        $this->measure_unit = MeasureUnits::MINUTES->value;
         $this->save();
 
-        return $this->fresh();
+        return $this;
     }
 
-    public function getEnabledAttribute()
+    /**
+     * Scope to get latests actives
+     */
+    public function scopeActive(Builder $query): void
     {
-        return $this->active_until === null;
-    }
-
-    public static function getSunriseTime()
-    {
-        $latitude = -24.7821; // Latitude for Salta, Argentina
-        $longitude = -65.4232; // Longitude for Salta, Argentina
-
-        $sun_info = date_sun_info(time(), $latitude, $longitude);
-
-        $sunriseTime = new DateTime('@' . $sun_info['sunrise']);
-        $sunriseTime->setTimezone(new DateTimeZone('America/Argentina/Salta'));
-
-        return $sunriseTime;
+        $query->whereNull('active_until');
     }
 
     /**
      * Scope to get latests
-     *
-     * @param  Builder  $query
-     * @return Builder
      */
-    public function scopeActive(Builder $query)
+    public function scopeLast(Builder $query): void
     {
-        return $query->whereNull('active_until');
-    }
-
-    /**
-     * Scope to get latests
-     *
-     * @param  Builder  $query
-     * @return Builder
-     */
-    public function scopeLast(Builder $query)
-    {
-        return $query->latest();
+        $query->latest();
     }
 
     /**
      * Scope to filter bt device
      *
-     * @param  Builder  $query
      * @param  array{}  $args
-     * @return Builder
      */
-    public function scopeFilterByDevice(Builder $query, array $args = [])
+    public function scopeFilterByDevice(Builder $query, array $args = []): void
     {
         $deviceName = $args['device'] ?? null;
-        return $query->when($deviceName, function ($query, $deviceName) {
+
+        $query->when($deviceName, function ($query, $deviceName) {
             $query->where('device', $deviceName);
         });
     }
 
     /**
-     * Get the measure that triggered this activation
+     * Get the deviation
+     *
+     * @return HasOneThrough Measure
      */
-    public function measure()
+    public function detection(): HasOneThrough
     {
-        return $this->belongsTo(Measure::class);
+        return $this->hasOneThrough(Measure::class, Deviation::class, 'id', 'id', 'deviation_id', 'detection_id');
+    }
+
+    /**
+     * Get the measure that triggered this activation
+     *
+     * @return HasOne Deviation
+     */
+    public function deviation(): HasOne
+    {
+        return $this->hasOne(Deviation::class);
     }
 
     /**
      * Get the measure that fixed this activation
+     *
+     * @return HasOneThrough Measure
      */
-    public function fix()
+    public function fix(): HasOneThrough
     {
-        return $this->belongsTo(Measure::class);
+        return $this->hasOneThrough(Measure::class, Deviation::class, 'id', 'id', 'fix_id', 'detection_id');
     }
 
     /**
-     * @return void
+     * Get device enabled status
      */
-    protected static function booted()
+    protected function enabled(): Attribute
     {
-        static::creating(function ($activation) {
-            // If there's an active record for the same device, don't activate the device
-            if (self::active()->whereDevice($activation->device)->get()->count()) {
-                return false;
-            }
-
-            if (!$activation->activated_by) {
-                $activation->activated_by = self::MANUAL;
-            }
-
-            return $activation;
-        });
-
-        static::created(function ($activation) {
-            Artisan::queue(SwitchDevice::class, ['device' => $activation->device, '--turn' => 'on']);
-
-            // Only manual activations will set a timeout to deactivate the device 
-            if ($activation->amount) {
-                DeactivateDevice::dispatch($activation)->delay(now()->addSeconds($activation->amount * 60));
-            }
-        });
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => $attributes['active_until'] === null,
+        );
     }
 }

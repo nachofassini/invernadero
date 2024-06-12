@@ -8,31 +8,27 @@ return new class() extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('measures', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->double('consumption', 6, 2)->nullable();;
-            $table->double('inside_temperature', 6, 2);
-            $table->double('outside_temperature', 6, 2);
-            $table->double('inside_humidity', 6, 2);
-            $table->double('outside_humidity', 6, 2);
-            $table->double('soil_humidity', 6, 2);
+            $table->double('consumption')->nullable();
+            $table->double('inside_temperature');
+            $table->double('outside_temperature');
+            $table->double('inside_humidity');
+            $table->double('outside_humidity');
+            $table->double('soil_humidity');
             $table->unsignedSmallInteger('co2')->nullable();
-            $table->double('lighting', 6, 2);
+            $table->double('lighting');
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('measures');
     }

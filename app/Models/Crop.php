@@ -3,17 +3,17 @@
 namespace App\Models;
 
 use App\Models\Traits\CalculatesPlanDeviations;
-use App\Models\Traits\FixPlanDeviations;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Crop extends Model
 {
-    use CalculatesPlanDeviations, FixPlanDeviations, HasFactory, SoftDeletes;
+    use CalculatesPlanDeviations, HasFactory, SoftDeletes;
 
     /**
      * The attributes that should be cast.
@@ -24,73 +24,39 @@ class Crop extends Model
         'name' => 'string',
         'active_since' => 'datetime',
         'active_until' => 'datetime',
+        'days' => 'int',
     ];
 
     /**
-     * The "booted" method of the model.
+     * The accessors to append to the model's array form.
+     *
+     * @var array
      */
-    protected static function booted(): void
-    {
-        // Deactivate crop when it is deleted
-        static::deleting(function (Crop $crop) {
-            $crop->deactivate();
-        });
+    protected $appends = ['active_until', 'days'];
 
-        // Deactivate all weather corrections when crop is deleted
-        static::deleting(function () {
-            Activation::active()->get()->each->deactivate();
-        });
-    }
-
-    /**
-     * Deactivates current crop
-     */
-    public function deactivate()
+    public static function getActive(): ?Crop
     {
-        $this->active_since = null;
-        $this->save();
-        return $this;
+        return self::active()->first();
     }
 
     /**
      * Retrieves current crop status
      */
-    public function getActiveAttribute()
+    public function getActiveAttribute(): bool
     {
         return $this->active_since && $this->active_since->isPast() && $this->active_until->isFuture();
     }
 
     /**
-     * Retrieves active crop cultivation end date
-     *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
-     */
-    protected function activeUntil(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value, $attributes) => $attributes['active_since'] ? (new Carbon($attributes['active_since']))->addDays($this->days) : null,
-        );
-    }
-
-    /**
      * Retrieves days since it has been activated
      */
-    public function getDayAttribute()
+    public function getDayAttribute(): int
     {
-        if (!$this->active) return 0;
-        return Carbon::now()->diff($this->active_since)->days;
-    }
+        if (! $this->active) {
+            return 0;
+        }
 
-    /**
-     * Retrieves crop total days
-     *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
-     */
-    protected function days(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->stages()->sum('days'),
-        );
+        return Carbon::now()->diff($this->active_since)->days;
     }
 
     /**
@@ -98,7 +64,7 @@ class Crop extends Model
      */
     public function getActiveStageAttribute()
     {
-        if (!$this->active) {
+        if (! $this->active) {
             return null;
         }
 
@@ -117,11 +83,12 @@ class Crop extends Model
 
     /**
      * Retrieves the date where the stage will became active
-     * @return []
      */
-    public function getStageRangesAttribute()
+    public function getStageRangesAttribute(): ?array
     {
-        if (!$this->active) return null;
+        if (! $this->active) {
+            return null;
+        }
 
         $ranges = [];
         $rangeStart = $this->active_since;
@@ -142,51 +109,36 @@ class Crop extends Model
     }
 
     /**
-     * @param  Measure $measure
      * Get plan deviations for current measure and trigger adjustments.
      */
-    public function handlePlanDeviations(Measure $measure)
+    public function handlePlanDeviations(Measure $measure): void
     {
-        $activeCorrections = Activation::active()->get();
-        logger('Active corrections', $activeCorrections->toArray());
+        $deviationsBeingHandled = Deviation::getActives();
 
         $detectedDeviations = collect($this->getPlanDeviations($measure));
-        logger('Plan deviations', $detectedDeviations->toArray());
 
-        $deviationsToFix = $detectedDeviations->reject(function ($deviation) use ($activeCorrections) {
-            return $activeCorrections->pluck('activated_by')->contains($deviation['type']);
-        });
-        $deviationsFixed = $activeCorrections->filter(function ($activeCorrection) use ($detectedDeviations) {
-            return !$detectedDeviations->pluck('type')->contains($activeCorrection->activated_by);
-        });
-        $deviationsInProgress = $activeCorrections->except($deviationsFixed->pluck('id')->toArray());
+        $deviationsBeingHandled->filter(function ($activeCorrection) use ($detectedDeviations) {
+            return ! $detectedDeviations->pluck('type')->contains($activeCorrection->type);
+        })->each->deactivate($measure);
+    }
 
-        logger('Deviations to fix', $deviationsToFix->toArray());
-        $this->fixDeviations($deviationsToFix, $measure);
+    /**
+     * Deactivates current crop
+     */
+    public function deactivate(): self
+    {
+        $this->active_since = null;
+        $this->save();
 
-        logger('Corrections to deactivate', $deviationsFixed->toArray());
-        $deviationsFixed->each(fn ($activeCorrection) => $activeCorrection->deactivate($measure));
-
-        logger('Corrections still in progress', $deviationsInProgress->toArray());
+        return $this;
     }
 
     /**
      * Scope a query to only include active crops
-     *
-     * @param  Builder  $query
-     * @return Builder
      */
-    public function scopeActive(Builder $query)
+    public function scopeActive(Builder $query): void
     {
-        return $query->whereNotNull('active_since');
-    }
-
-    /**
-     * Get the stages.
-     */
-    public function stages()
-    {
-        return $this->hasMany(Stage::class)->orderBy('order');
+        $query->whereNotNull('active_since');
     }
 
     /**
@@ -195,5 +147,34 @@ class Crop extends Model
     public function stagesCount()
     {
         return $this->stagesCount();
+    }
+
+    /**
+     * Retrieves crop total days
+     */
+    public function days(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => (int) $this->stages()->sum('days'),
+        );
+    }
+
+    /**
+     * Get the stages.
+     */
+    public function stages(): HasMany
+    {
+        return $this->hasMany(Stage::class)->orderBy('order');
+    }
+
+    /**
+     * Retrieves active crop cultivation end date
+     */
+    protected function activeUntil(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value, $attributes) => $attributes['active_since']
+                ? Carbon::parse($attributes['active_since'])->addDays($this->days) : null
+        );
     }
 }
