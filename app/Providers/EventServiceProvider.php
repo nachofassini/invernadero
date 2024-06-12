@@ -2,12 +2,13 @@
 
 namespace App\Providers;
 
+use App\Models\Activation;
 use App\Models\Measure;
+use App\Observers\ActivationObserver;
 use App\Observers\MeasureObserver;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -30,6 +31,7 @@ class EventServiceProvider extends ServiceProvider
     public function boot()
     {
         Measure::observe(MeasureObserver::class);
+        Activation::observe(ActivationObserver::class);
     }
 
     /**

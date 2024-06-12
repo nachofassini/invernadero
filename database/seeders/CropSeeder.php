@@ -3,9 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Crop;
-use App\Models\Stage;
 use Carbon\Carbon;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class CropSeeder extends Seeder
@@ -26,7 +24,7 @@ class CropSeeder extends Seeder
             [
                 'name' => 'Germinación',
                 'order' => 1,
-                'days' => 30,
+                'days' => 5,
                 'min_temperature' => 20,
                 'max_temperature' => 30,
                 'min_humidity' => 30,
@@ -39,7 +37,7 @@ class CropSeeder extends Seeder
             [
                 'name' => 'Crecimiento',
                 'order' => 2,
-                'days' => 45,
+                'days' => 15,
                 'min_temperature' => 22.5,
                 'max_temperature' => 32.5,
                 'min_humidity' => 20,
@@ -52,7 +50,7 @@ class CropSeeder extends Seeder
             [
                 'name' => 'Maduración',
                 'order' => 3,
-                'days' => 20,
+                'days' => 10,
                 'min_temperature' => 22.5,
                 'max_temperature' => 30,
                 'min_humidity' => 20,

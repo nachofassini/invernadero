@@ -49,6 +49,7 @@ class Crop extends Model
     {
         $this->active_since = null;
         $this->save();
+
         return $this;
     }
 
@@ -61,36 +62,15 @@ class Crop extends Model
     }
 
     /**
-     * Retrieves active crop cultivation end date
-     *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
-     */
-    protected function activeUntil(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value, $attributes) => $attributes['active_since'] ? (new Carbon($attributes['active_since']))->addDays($this->days) : null,
-        );
-    }
-
-    /**
      * Retrieves days since it has been activated
      */
     public function getDayAttribute()
     {
-        if (!$this->active) return 0;
-        return Carbon::now()->diff($this->active_since)->days;
-    }
+        if (! $this->active) {
+            return 0;
+        }
 
-    /**
-     * Retrieves crop total days
-     *
-     * @return \Illuminate\Database\Eloquent\Casts\Attribute
-     */
-    protected function days(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->stages()->sum('days'),
-        );
+        return Carbon::now()->diff($this->active_since)->days;
     }
 
     /**
@@ -98,7 +78,7 @@ class Crop extends Model
      */
     public function getActiveStageAttribute()
     {
-        if (!$this->active) {
+        if (! $this->active) {
             return null;
         }
 
@@ -117,11 +97,14 @@ class Crop extends Model
 
     /**
      * Retrieves the date where the stage will became active
+     *
      * @return []
      */
     public function getStageRangesAttribute()
     {
-        if (!$this->active) return null;
+        if (! $this->active) {
+            return null;
+        }
 
         $ranges = [];
         $rangeStart = $this->active_since;
@@ -142,13 +125,12 @@ class Crop extends Model
     }
 
     /**
-     * @param  Measure $measure
-     * Get plan deviations for current measure and trigger adjustments.
+     * @param  Measure  $measure
+     *                            Get plan deviations for current measure and trigger adjustments.
      */
     public function handlePlanDeviations(Measure $measure)
     {
-        $activeCorrections = Activation::active()->get();
-        logger('Active corrections', $activeCorrections->toArray());
+        $activeCorrections = Activation::getActives();
 
         $detectedDeviations = collect($this->getPlanDeviations($measure));
         logger('Plan deviations', $detectedDeviations->toArray());
@@ -157,7 +139,7 @@ class Crop extends Model
             return $activeCorrections->pluck('activated_by')->contains($deviation['type']);
         });
         $deviationsFixed = $activeCorrections->filter(function ($activeCorrection) use ($detectedDeviations) {
-            return !$detectedDeviations->pluck('type')->contains($activeCorrection->activated_by);
+            return ! $detectedDeviations->pluck('type')->contains($activeCorrection->activated_by);
         });
         $deviationsInProgress = $activeCorrections->except($deviationsFixed->pluck('id')->toArray());
 
@@ -173,7 +155,6 @@ class Crop extends Model
     /**
      * Scope a query to only include active crops
      *
-     * @param  Builder  $query
      * @return Builder
      */
     public function scopeActive(Builder $query)
@@ -184,16 +165,36 @@ class Crop extends Model
     /**
      * Get the stages.
      */
-    public function stages()
+    public function stagesCount()
     {
-        return $this->hasMany(Stage::class)->orderBy('order');
+        return $this->stagesCount();
+    }
+
+    /**
+     * Retrieves active crop cultivation end date
+     */
+    protected function activeUntil(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value, $attributes) => $attributes['active_since'] ? (new Carbon($attributes['active_since']))->addDays($this->days) : null,
+        );
+    }
+
+    /**
+     * Retrieves crop total days
+     */
+    protected function days(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->stages()->sum('days'),
+        );
     }
 
     /**
      * Get the stages.
      */
-    public function stagesCount()
+    public function stages()
     {
-        return $this->stagesCount();
+        return $this->hasMany(Stage::class)->orderBy('order');
     }
 }

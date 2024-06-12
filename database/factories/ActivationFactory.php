@@ -2,13 +2,15 @@
 
 namespace Database\Factories;
 
+use App\Enums\Devices;
+use App\Enums\MeasureUnits;
 use App\Models\Activation;
-use App\Models\Measure;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Deviation;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Activation>
+ * @extends Factory<Activation>
  */
 class ActivationFactory extends Factory
 {
@@ -24,17 +26,16 @@ class ActivationFactory extends Factory
      *
      * @return array<string, mixed>
      */
-    public function definition()
+    public function definition(): array
     {
         return [
+            'device' => fake()->randomElement(Devices::values()),
             'active_until' => function (array $attributes) {
-                return fake()->dateTimeBetween($attributes['created_at'], Carbon::parse($attributes['created_at'])->addHour());
+                return fake()->dateTimeBetween(Carbon::now(), Carbon::now()->addHour());
             },
-            'device' => fake()->randomElement(Activation::DEVICES),
-            'activated_by' => fake()->randomElement(Activation::TYPES),
-            'measure_id' => Measure::factory(),
+            'deviation_id' => Deviation::factory(),
             'amount' => fake()->randomFloat(1, 0, 1200),
-            'measure_unit' => fake()->randomElement(Activation::MEASURE_UNITS),
+            'measure_unit' => fake()->randomElement(MeasureUnits::values()),
         ];
     }
 }

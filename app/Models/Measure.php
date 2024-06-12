@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Measure extends Model
 {
@@ -47,7 +48,6 @@ class Measure extends Model
     /**
      * Scope to get latests
      *
-     * @param  Builder  $query
      * @return Builder
      */
     public function scopeLast(Builder $query)
@@ -58,8 +58,16 @@ class Measure extends Model
     /**
      * Get the activations triggered by this measure.
      */
-    public function activations()
+    public function deviations(): HasMany
     {
-        return $this->hasMany(Activation::class);
+        return $this->hasMany(Deviation::class, 'detection_id');
+    }
+
+    /**
+     * Get the activations fixed by this measure.
+     */
+    public function fixes(): HasMany
+    {
+        return $this->hasMany(Deviation::class, 'fix_id');
     }
 }
